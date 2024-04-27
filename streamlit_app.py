@@ -48,7 +48,7 @@ def load_data():
     try:
         data = pd.read_csv(csv_file)
         # Convert 'Date' column to datetime format
-        data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d')
+        data['Date'] = pd.to_datetime(data['Date'], format='%d-%m-%Y')
         
         # Sort data based on date
         data.sort_values(by='Date', inplace=True)
@@ -129,7 +129,7 @@ with left_col:
         + other_expenses_amount_1
     )
     st.markdown(
-        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Expenses: {expenses_shop_total}</div>',
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Expenses: ₹{expenses_shop_total}</div>',
         unsafe_allow_html=True
     )
 
@@ -157,7 +157,7 @@ with right_col:
     )
 
     st.markdown(
-        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total: {denomination_total}</div>',
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total: ₹{denomination_total}</div>',
         unsafe_allow_html=True
     )
 
@@ -166,7 +166,7 @@ with right_col:
     # Calculate closing cash and display
     closing_cash = denomination_total - cash_withdrawn
     st.markdown(
-        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Closing Cash: {closing_cash}</div>',
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Closing Cash: ₹{closing_cash}</div>',
         unsafe_allow_html=True
     )
 
@@ -190,12 +190,37 @@ with right_col:
     # Limit negative cash difference to -100
     if cash_difference < -100:
         cash_difference = -100
+        
+    st.markdown(
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Sales: ₹{total_sales_pos}</div>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Cash: ₹{total_sales_pos - paytm}</div>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Paytm: ₹{paytm}</div>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Expenses: ₹{expenses_shop_total}</div>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Cash: ₹{total_cash}</div>',
+        unsafe_allow_html=True
+    )
     
     # Display cash difference with custom font size and color
     font_size = "28px"
     font_weight = "bold"
     st.markdown(
-        f'<div style="color: {text_color}; font-size: {font_size}; font-weight: {font_weight};">Difference: {cash_difference}</div>',
+        f'<div style="color: {text_color}; font-size: {font_size}; font-weight: {font_weight};">Difference: ₹{cash_difference}</div>',
         unsafe_allow_html=True
     )
 
@@ -204,7 +229,7 @@ submit_button = st.button("Submit")
 
 if submit_button:
     new_row = {
-        "Date": date_input,
+        "Date": date_input.strftime('%d-%m-%Y'),  # Only use the date part
         "Opening Cash": opening_cash,
         "Expenses Shop": expenses_shop_total,
         "Denomination Total": denomination_total,
@@ -243,11 +268,11 @@ if submit_button:
         # Use pd.concat() to add the new row to the existing data
         data = pd.concat([data, pd.DataFrame([new_row])], ignore_index=True)
 
-        # Save the updated data to the CSV file
-        data.to_csv(csv_file, index=False)
+        # Append the new data to the CSV file without overwriting, with proper line terminators
+        with open(csv_file, 'a', encoding='utf-8', newline='') as f:
+            # Write the data to CSV without header if appending
+            data.tail(1).to_csv(f, header=f.tell() == 0, index=False, lineterminator='\n')
 
         st.success("Data submitted successfully!")
-
-        # Add some visual feedback to indicate success
         st.balloons()
 
