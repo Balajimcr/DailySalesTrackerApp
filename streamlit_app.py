@@ -1,11 +1,37 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
-
+from datetime import datetime, timedelta
 
 # File paths for CSV files
 csv_file = "database_collection.csv"
 employee_csv = "Employee_data.csv"  # CSV file containing employee names
+
+tabs_font_css = """
+<style>
+div[class*="stNumberInput"] label {
+  font-size: 26px;
+  color: black;
+}
+</style>
+"""
+
+def Text(text, font_size='large'):
+    """
+    Convert plain text to LaTeX expression with specified font size.
+    
+    Parameters:
+        text (str): The plain text to convert.
+        font_size (str): The font size to use in LaTeX (e.g., 'Large', 'Huge', etc.).
+    
+    Returns:
+        str: The LaTeX expression with the specified font size.
+    """
+    # Define LaTeX expression with specified font size
+    latex_text = rf"$\textsf{{\{font_size} {text}}}$"
+    
+    return latex_text
+
 
 # Load employee names from a separate CSV file
 def load_employee_names():
@@ -14,14 +40,31 @@ def load_employee_names():
         employee_names = employee_data["Name"].tolist()
     except (FileNotFoundError, IndexError):
         st.error("Employee names file not found! Please ensure the file exists.")
-        employee_names = ["Kamal","Gopal","Arumugam","Temporary"]  # Default to an empty list if no data
+        employee_names = ["Kamal","Gopal","Arumugam","Employee 4"]  # Default to an empty list if no data
     return employee_names
 
 # Load existing data from the CSV file (if it exists)
 def load_data():
     try:
         data = pd.read_csv(csv_file)
-        last_closing_cash = data["Closing Cash"].iloc[-1]  # If data exists, get the last day's closing cash
+        # Convert 'Date' column to datetime format
+        data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d')
+        
+        # Sort data based on date
+        data.sort_values(by='Date', inplace=True)
+        
+        # Get today's date as datetime object
+        today_date = datetime.combine(datetime.today().date(), datetime.min.time())
+        
+        # Filter out entries for today and create a copy
+        filtered_data = data[data['Date'] < today_date].copy()
+        
+        # Get the last entry's closing cash as previous day's closing cash
+        if not filtered_data.empty:
+            last_closing_cash = filtered_data["Closing Cash"].iloc[-1]
+        else:
+            last_closing_cash = 0
+        
     except (FileNotFoundError, IndexError):
         data = pd.DataFrame(columns=[
             "Date", "Opening Cash", "Expenses Shop", "Denomination Total", 
@@ -35,11 +78,14 @@ def load_data():
         last_closing_cash = 0  # Default to zero if no data
     return data, last_closing_cash
 
+
 # Initialize data, last closing cash, and employee names
 data, last_closing_cash = load_data()
 employee_names = load_employee_names()
 
-st.title("Daily Accounts")
+st.title("Elite Salon Daily Accounts")
+
+st.write(tabs_font_css, unsafe_allow_html=True)
 
 # Create a two-column layout
 left_col, right_col = st.columns(2)
@@ -47,32 +93,27 @@ left_col, right_col = st.columns(2)
 # Data input fields in the left column
 with left_col:
     st.subheader("Sales")
-    date_input = st.date_input("Date (தேதி)", value=date.today(), format="DD-MM-YYYY")
-    total_sales_pos = st.number_input("Total Sales POS ( சேல்ஸ் )", min_value=0, step=100)
-    paytm = st.number_input("Paytm (பேடிஎம்)", min_value=0, step=100)
-
-    # Display opening cash in read-only format
-    opening_cash = last_closing_cash
-    st.markdown(
-        f'<div style="color: blue; font-size: 18px; font-weight: bold;">Opening Cash (ஆரம்ப இருப்பு) : {opening_cash}</div>',
-        unsafe_allow_html=True
-    )
+    #Date_Label = '<p style="color:Black; font-size: 24px;"></p>'
+    date_input = st.date_input(Text("Date (தேதி)"), value=date.today(), format="DD-MM-YYYY")
+    opening_cash = st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"),value=last_closing_cash, min_value=0, step=100)
+    total_sales_pos = st.number_input(Text("Total Sales POS ( சேல்ஸ் )"), min_value=0, step=100)
+    paytm = st.number_input(Text("Paytm (பேடிஎம்)"), min_value=0, step=100)
 
     # Expenses fields
     st.subheader("Expenses")
-    employee_1_advance = st.number_input(employee_names[0], min_value=0, step=100)
-    employee_2_advance = st.number_input(employee_names[1], min_value=0, step=100)
-    employee_3_advance = st.number_input(employee_names[2], min_value=0, step=100)
-    employee_4_advance = st.number_input(employee_names[3], min_value=0, step=100)
-    cleaning = st.number_input("Cleaning (சுதாகர்)", min_value=0, step=100)
+    employee_1_advance = st.number_input(Text(employee_names[0]), min_value=0, step=100)
+    employee_2_advance = st.number_input(Text(employee_names[1]), min_value=0, step=100)
+    employee_3_advance = st.number_input(Text(employee_names[2]), min_value=0, step=100)
+    employee_4_advance = st.number_input(Text(employee_names[3]), min_value=0, step=100)
+    cleaning = st.number_input(Text("Cleaning (சுதாகர்)"), min_value=0, step=100)
 
     # Combo box for other expenses with hidden label
-    other_expenses_name = st.selectbox("Other Expenses Name", 
+    other_expenses_name = st.selectbox(Text("Other Expenses Name"), 
                                        ["Tea or Snacks ( டீ )", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"],
                                        label_visibility="collapsed")
     other_expenses_amount = st.number_input("Other Expenses Amount", min_value=0, step=100, label_visibility="collapsed")
 
-    other_expenses_name_1 = st.selectbox("Other Expenses Name 1", 
+    other_expenses_name_1 = st.selectbox(Text("Other Expenses Name 1"), 
                                          ["Others (வேறு செலவு)", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"],
                                          label_visibility="collapsed")
     other_expenses_amount_1 = st.number_input("Other Expenses Amount 1", min_value=0, step=100, label_visibility="collapsed")
@@ -96,13 +137,13 @@ with left_col:
 # Denominations in the right column
 with right_col:
     st.subheader("Denominations")
-    denom_500 = st.number_input("500 x", min_value=0, step=1)
-    denom_200 = st.number_input("200 x", min_value=0, step=1)
-    denom_100 = st.number_input("100 x", min_value=0, step=1)
-    denom_50 = st.number_input("50 x", min_value=0, step=1)
-    denom_20 = st.number_input("20 x", min_value=0, step=1)
-    denom_10 = st.number_input("10 x", min_value=0, step=1)
-    denom_5 = st.number_input("5 x", min_value=0, step=1)
+    denom_500 = st.number_input(Text("500 x"), min_value=0, step=1)
+    denom_200 = st.number_input(Text("200 x"), min_value=0, step=1)
+    denom_100 = st.number_input(Text("100 x"), min_value=0, step=1)
+    denom_50  = st.number_input(Text("50 x"), min_value=0, step=1)
+    denom_20  = st.number_input(Text("20 x"), min_value=0, step=1)
+    denom_10  = st.number_input(Text("10 x"), min_value=0, step=1)
+    denom_5   = st.number_input(Text("5 x"), min_value=0, step=1)
 
     # Calculate the denomination total
     denomination_total = (
@@ -120,7 +161,7 @@ with right_col:
         unsafe_allow_html=True
     )
 
-    cash_withdrawn = st.number_input("Cash Withdrawn (பணம் எடுத்தது)", min_value=0, step=100)
+    cash_withdrawn = st.number_input(Text("Cash Withdrawn (பணம் எடுத்தது)"), min_value=0, step=100)
 
     # Calculate closing cash and display
     closing_cash = denomination_total - cash_withdrawn
