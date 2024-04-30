@@ -1,0 +1,42 @@
+import streamlit as st
+import hashlib
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+# Simulated user database with hashed passwords
+USER_DATA = {
+    "balajimcr@gmail.com":"f20732a590b9312ee8282a5962cc5b90e4c1bbb31e5c537d51857c5a3fab5a41",
+    "elitesalonlalgudi@gmail.com":"595263a9ccd47845fe080d8de3703c4f8f4c182ff7fa4f59a2edd8ec37dfe34e",
+}
+# Check user session to determine if they're logged in
+def is_logged_in():
+    ctx = get_script_run_ctx()
+    if ctx.session_id in st.session_state:
+        return st.session_state[ctx.session_id].get("logged_in", False)
+    return False
+
+# Set user session to mark login status
+def set_logged_in(logged_in):
+    ctx = get_script_run_ctx()
+    if ctx.session_id not in st.session_state:
+        st.session_state[ctx.session_id] = {}
+    st.session_state[ctx.session_id]["logged_in"] = logged_in
+
+# Login form
+def login():
+    st.header("Elite Salon Daily Accounts")
+    st.header("Login")
+    username = st.text_input("Username", key="username")
+    password = st.text_input("Password", type="password", key="password")
+    login_button = st.button("Login")
+
+    if login_button:
+        if username in USER_DATA:
+            # Hash the entered password
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            if USER_DATA[username] == hashed_password:
+                set_logged_in(True)
+                st.success("Login successful!")
+            else:
+                st.error("Invalid password. Please try again.")
+        else:
+            st.error("Invalid username. Please try again.")
