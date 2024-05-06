@@ -2,8 +2,9 @@ import pandas as pd
 from datetime import datetime
 import pandas as pd  # Make sure pandas is imported
 
-csv_file = "database_collection.csv"
-employee_csv = "Employee_data.csv"
+csv_file = "Data/EliteSalonLalgudi/database_collection.csv"
+employee_csv = "Data/EliteSalonLalgudi/Employee_data.csv"
+employee_salary_Advance_bankTransfer_csv = "Data/EliteSalonLalgudi/employee_salary_Advance_bankTransfer_data.csv"
 
 def load_employee_names():
     try:

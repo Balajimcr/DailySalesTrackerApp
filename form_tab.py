@@ -106,6 +106,8 @@ def form_tab():
         # Calculate total cash and cash difference
         total_cash = opening_cash + (total_sales_pos - paytm) - expenses_shop_total + offset
         cash_difference = total_cash - denomination_total
+        
+        cash_difference_masked = cash_difference
 
         # Set text color based on cash difference
         if cash_difference > 100:
@@ -117,7 +119,7 @@ def form_tab():
             
         # Limit negative cash difference to -100
         if cash_difference < -100:
-            cash_difference = random.randint(1, 10) * 10
+            cash_difference_masked = random.randint(1, 10) * 10
             
         st.markdown(
             f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Sales: ₹{total_sales_pos}</div>',
@@ -148,7 +150,7 @@ def form_tab():
         font_size = "28px"
         font_weight = "bold"
         st.markdown(
-            f'<div style="color: {text_color}; font-size: {font_size}; font-weight: {font_weight};">Difference: ₹{cash_difference}</div>',
+            f'<div style="color: {text_color}; font-size: {font_size}; font-weight: {font_weight};">Difference: ₹{cash_difference_masked}</div>',
             unsafe_allow_html=True
         )
 
@@ -193,6 +195,13 @@ def form_tab():
             Pass = False
             st.markdown(
                 f'<div style="color: Red; font-size: {font_size}; font-weight: {font_weight};"> [Error] Cash Withdrawn is wrong! {cash_withdrawn} > {denomination_total} </div>',
+                unsafe_allow_html=True
+            )
+            
+        if abs(cash_difference) > 1000:
+            Pass = False
+            st.markdown(
+                f'<div style="color: Red; font-size: {font_size}; font-weight: {font_weight};"> [Error] High Cash Difference : {cash_difference}! Call Owner  </div>',
                 unsafe_allow_html=True
             )
 

@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import datetime
 from datetime import date, datetime, timedelta
-from data_management import csv_file, employee_csv
+from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv
 
 
 def custom_table_style():
@@ -34,7 +34,7 @@ def display_data(data):
     styled_data = data
     st.dataframe(styled_data)  # Display the styled dataframe
     
-def save_data_to_csv(new_data, file_name='employee_salary_Advance_bankTransfer_data.csv'):
+def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_csv):
     # Check if file exists
     if not os.path.isfile(file_name):
         # Create a new DataFrame and save it
@@ -105,8 +105,8 @@ def employee_salary_tab():
             unsafe_allow_html=True
         )
     
-    if os.path.isfile('employee_salary_Advance_bankTransfer_data.csv'):
-        employee_salary_Advance_bankTransfer = pd.read_csv('employee_salary_Advance_bankTransfer_data.csv')
+    if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
+        employee_salary_Advance_bankTransfer = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
         display_data(employee_salary_Advance_bankTransfer)
 
     expected_columns = ["Date", employee_names_list[0], employee_names_list[1], employee_names_list[2], employee_names_list[3]]
