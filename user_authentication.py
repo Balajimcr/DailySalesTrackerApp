@@ -21,7 +21,7 @@ def set_logged_in(logged_in):
         st.session_state[ctx.session_id] = {}
     st.session_state[ctx.session_id]["logged_in"] = logged_in
 
-# Login form
+# Login form that returns the login status
 def login():
     st.header("Elite Salon Daily Accounts")
     st.header("Login")
@@ -36,7 +36,11 @@ def login():
             if USER_DATA[username] == hashed_password:
                 set_logged_in(True)
                 st.success("Login successful!")
+                return True
             else:
                 st.error("Invalid password. Please try again.")
+                return False
         else:
             st.error("Invalid username. Please try again.")
+            return False
+    return False
