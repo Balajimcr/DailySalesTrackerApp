@@ -1,6 +1,10 @@
 import streamlit as st
 from data_management import load_data, load_employee_names
 import pandas as pd
+import os
+import datetime
+from datetime import date, datetime, timedelta
+from data_management import csv_file, employee_csv
 
 
 def custom_table_style():
@@ -26,21 +30,25 @@ def custom_table_style():
 
 def display_data(data):
     custom_table_style()  # Call the style function
-
-    def highlight_difference(val):
-        """
-        Highlights the 'Cash Difference' cell based on its value.
-        """
-        color = 'red' if val > 100 else ('green' if val < 100 else 'none')
-        return f'background-color: {color}'
-
-    # Applying the style to the dataframe
+    
     styled_data = data
     st.dataframe(styled_data)  # Display the styled dataframe
+    
+def save_data_to_csv(new_data, file_name='employee_salary_Advance_bankTransfer_data.csv'):
+    # Check if file exists
+    if not os.path.isfile(file_name):
+        # Create a new DataFrame and save it
+        pd.DataFrame([new_data]).to_csv(file_name, index=False)
+    else:
+        # Load existing data and append new data
+        existing_data = pd.read_csv(file_name)
+        new_frame = pd.DataFrame([new_data])
+        updated_data = pd.concat([existing_data, new_frame], ignore_index=True)
+        updated_data.to_csv(file_name, index=False)
+    return pd.read_csv(file_name)  # Return updated data
 
-
-def shop_purchase_tab():
-    st.title("Shop Purchase Account")
+def employee_salary_tab():
+    st.title("Employee Salary Account")
 
     # Check if the CSV file exists
     try:
@@ -75,11 +83,38 @@ def shop_purchase_tab():
     if 'Date' in data_copy.columns:
         data_copy['Date'] = pd.to_datetime(data_copy['Date']).dt.strftime('%Y-%m-%d (%A)')
         data_copy = data_copy.sort_values(by='Date', ascending=False)
+        
+    # User Inputs
+    input_date = st.date_input("Date", value=date.today(), format="DD-MM-YYYY")
+    input_amount = st.number_input("Amount", min_value=0, step=1000) 
+    input_employee = st.selectbox("Employee", options=employee_names_list)
+    input_comments = st.text_input("Comments")
 
-    expected_columns = ["Date", employee_names_list[0], employee_names_list[1], employee_names_list[2], employee_names_list[3], "Cleaning", "Other Expenses Name", "Other Expenses Amount", "Other Expenses Name_1", "Other Expenses Amount_1", "Expenses Shop"]
+    if st.button("Save Entry"):
+        new_entry = {
+            "Date": input_date.strftime('%d-%m-%Y'),
+            "Amount": input_amount,
+            "Employee": input_employee,
+            "Comments": input_comments
+        }
+        save_data_to_csv(new_entry)
+
+    # Display existing data
+    st.markdown(
+            f'<div style="color: black; font-size: 24px; font-weight: bold;">Employee Salary Advance Bank Transfers:</div>',
+            unsafe_allow_html=True
+        )
+    
+    if os.path.isfile('employee_salary_Advance_bankTransfer_data.csv'):
+        employee_salary_Advance_bankTransfer = pd.read_csv('employee_salary_Advance_bankTransfer_data.csv')
+        display_data(employee_salary_Advance_bankTransfer)
+
+    expected_columns = ["Date", employee_names_list[0], employee_names_list[1], employee_names_list[2], employee_names_list[3]]
     
     if not all(col in data_copy.columns for col in expected_columns):
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
         display_data(data_copy[expected_columns])
+    
+   
 

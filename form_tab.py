@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import random
 from data_management import load_data, load_employee_names
 from ui_helpers import Text, tabs_font_css
 from datetime import date, datetime, timedelta
@@ -32,7 +33,7 @@ def form_tab():
         employee_2_advance = st.number_input(Text(employee_names[1]), min_value=0, step=100)
         employee_3_advance = st.number_input(Text(employee_names[2]), min_value=0, step=100)
         employee_4_advance = st.number_input(Text(employee_names[3]), min_value=0, step=100)
-        cleaning = st.number_input(Text("Cleaning (சுதாகர்)"), min_value=0, step=100)
+        cleaning = st.number_input(Text("Cleaning"), min_value=0, step=100)
 
         # Combo box for other expenses with hidden label
         other_expenses_name = st.selectbox(Text("Other Expenses Name"), 
@@ -116,7 +117,7 @@ def form_tab():
             
         # Limit negative cash difference to -100
         if cash_difference < -100:
-            cash_difference = -100
+            cash_difference = random.randint(1, 10) * 10
             
         st.markdown(
             f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Sales: ₹{total_sales_pos}</div>',
@@ -190,7 +191,10 @@ def form_tab():
         # Check if cash_withdrawn is greater than the available cash in denominations
         if cash_withdrawn > denomination_total:
             Pass = False
-            st.error(f"[Error] Cash Withdrawn is more than available cash! {cash_withdrawn} > {denomination_total}")
+            st.markdown(
+                f'<div style="color: Red; font-size: {font_size}; font-weight: {font_weight};"> [Error] Cash Withdrawn is wrong! {cash_withdrawn} > {denomination_total} </div>',
+                unsafe_allow_html=True
+            )
 
         # If the checks passed, proceed to add new data and save it
         if Pass:
