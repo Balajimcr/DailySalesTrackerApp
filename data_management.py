@@ -7,6 +7,7 @@ UserDirectoryPath = "Data/EliteSalonLalgudi/"
 csv_file = UserDirectoryPath +"database_collection.csv"
 employee_csv = UserDirectoryPath +"Employee_data.csv"
 employee_salary_Advance_bankTransfer_csv = UserDirectoryPath +"employee_salary_Advance_bankTransfer_data.csv"
+employee_salary_data_csv = UserDirectoryPath +"employee_salary_data.csv"
 
 def load_employee_names():
     try:

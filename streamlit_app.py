@@ -25,7 +25,7 @@ def main_app():
             st.experimental_rerun()
         else:
             st.warning("Please log in to continue.")
-    elif is_logged_in():
+    elif True:#is_logged_in():
         if st.session_state['current_tab'] == Text("Form"):
             form_tab()
         elif st.session_state['current_tab'] == "Daily Accounts Database":

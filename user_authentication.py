@@ -5,7 +5,7 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 # Simulated user database with hashed passwords
 USER_DATA = {
     "balajimcr@gmail.com":"f20732a590b9312ee8282a5962cc5b90e4c1bbb31e5c537d51857c5a3fab5a41",
-    "elitesalonlalgudi@gmail.com":"595263a9ccd47845fe080d8de3703c4f8f4c182ff7fa4f59a2edd8ec37dfe34e",
+    "elitesalonlalgudi@gmail.com":"9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0",
 }
 # Check user session to determine if they're logged in
 def is_logged_in():

@@ -7,33 +7,11 @@ from datetime import date, datetime, timedelta
 from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv
 
 
-def custom_table_style():
-    # CSS to inject contained in a triple-quoted string
-    table_style = """
-    <style>
-    /* Adds styling to the table headers */
-    thead tr th {
-        background-color: #f0f0f0;  /* Light grey background */
-        color: black;               /* Black text */
-        font-size: 22pt;           /* Larger font size */
-    }
-    /* Style for the table data cells */
-    tbody tr td {
-        color: black;               /* Black text */
-        font-size: 20pt;           /* Slightly smaller font size than headers */
-    }
-    </style>
-    """
-
-    # Display the CSS style
-    st.markdown(table_style, unsafe_allow_html=True)
-
-def display_data(data):
-    custom_table_style()  # Call the style function
-    
-    styled_data = data
-    st.dataframe(styled_data)  # Display the styled dataframe
-    
+def display_data(dataframe, title):
+    """Display a dataframe with a title."""
+    st.markdown(f'<div style="color: black; font-size: 24px; font-weight: bold;">{title}:</div>', unsafe_allow_html=True)
+    st.dataframe(dataframe)
+        
 def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_csv):
     # Check if file exists
     if not os.path.isfile(file_name):
@@ -48,7 +26,7 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
     return pd.read_csv(file_name)  # Return updated data
 
 def employee_salary_tab():
-    st.title("Employee Salary Account")
+    st.title("Employee Salary Accounts")
 
     # Check if the CSV file exists
     try:
@@ -98,23 +76,18 @@ def employee_salary_tab():
             "Comments": input_comments
         }
         save_data_to_csv(new_entry)
-
-    # Display existing data
-    st.markdown(
-            f'<div style="color: black; font-size: 24px; font-weight: bold;">Employee Salary Advance Bank Transfers:</div>',
-            unsafe_allow_html=True
-        )
     
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
         employee_salary_Advance_bankTransfer = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
-        display_data(employee_salary_Advance_bankTransfer)
+        display_data(employee_salary_Advance_bankTransfer,"Employee Advance Bank Transfer")
 
     expected_columns = ["Date", employee_names_list[0], employee_names_list[1], employee_names_list[2], employee_names_list[3]]
     
     if not all(col in data_copy.columns for col in expected_columns):
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
-        display_data(data_copy[expected_columns])
+        employee_cash_withdrawn_data = data_copy[expected_columns]
+        display_data(employee_cash_withdrawn_data,"Employee Cash Advance")
     
    
 
