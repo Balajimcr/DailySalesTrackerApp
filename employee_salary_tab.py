@@ -6,12 +6,8 @@ import os
 import datetime
 from datetime import date, datetime, timedelta
 from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv,employee_salary_data_csv
+from ui_helpers import display_data
 
-
-def display_data(dataframe, title):
-    """Display a dataframe with a title."""
-    st.markdown(f'<div style="color: black; font-size: 24px; font-weight: bold;">{title}:</div>', unsafe_allow_html=True)
-    st.dataframe(dataframe)
         
 def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_csv):
     # Check if file exists

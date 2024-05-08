@@ -51,3 +51,7 @@ def display_text(text, color="blue", font_size="24px", font_weight="bold"):
   st.markdown(f'<div style="color: {color}; font-size: {font_size}; font-weight: {font_weight};">'\
               f'{text}</div>', unsafe_allow_html=True)
 
+def display_data(dataframe, title):
+    """Display a dataframe with a title."""
+    st.markdown(f'<div style="color: black; font-size: 24px; font-weight: bold;">{title}:</div>', unsafe_allow_html=True)
+    st.dataframe(dataframe)
