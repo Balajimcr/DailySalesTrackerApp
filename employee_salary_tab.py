@@ -28,7 +28,7 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
 
 def load_salary_data():
     try:
-        return pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=True)
+        return pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=False)
     except FileNotFoundError:
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
@@ -38,8 +38,13 @@ def update_sales_data():
     if salary_data is None:
         return  # Exit if the data couldn't be loaded
     
-    salary_data['Month'] = pd.to_datetime(salary_data['Month']).dt.strftime('%d-%m-%Y')
-    # Sort the DataFrame by index in descending order
+    # Ensure 'Month' is in datetime format; parse again if necessary
+    if not pd.api.types.is_datetime64_any_dtype(salary_data['Month']):
+        salary_data['Month'] = pd.to_datetime(salary_data['Month'], errors='coerce')
+        if salary_data['Month'].isnull().any():
+            st.error("There are invalid date entries in the 'Month' column.")
+            return
+
     salary_data = salary_data.sort_values(by='Month', ascending=False)
 
     st.write("### Update Total Sales Data")
