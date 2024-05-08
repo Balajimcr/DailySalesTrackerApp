@@ -21,18 +21,18 @@ def form_tab():
     # Data input fields in the left column
     with left_col:
         st.subheader("Sales")
-        date_input      = st.date_input(Text("Date (தேதி)"), value=date.today(), format="DD-MM-YYYY")
-        opening_cash    =  st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"),value=last_closing_cash, min_value=0, step=100)
-        total_sales_pos = st.number_input(Text("Total Sales POS ( சேல்ஸ் )"), min_value=0, step=100)
-        paytm           = st.number_input(Text("Paytm (பேடிஎம்)"), min_value=0, step=100)
+        date_input = st.date_input(Text("Date (தேதி)"), value=st.session_state.get('date_input', date.today()), format="DD-MM-YYYY")
+        opening_cash = st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"), value=st.session_state.get('opening_cash', last_closing_cash), min_value=0, step=100)
+        total_sales_pos = st.number_input(Text("Total Sales POS ( சேல்ஸ் )"), value=st.session_state.get('total_sales_pos', 0), min_value=0, step=100)
+        paytm = st.number_input(Text("Paytm (பேடிஎம்)"), value=st.session_state.get('paytm', 0), min_value=0, step=100)
 
         # Expenses fields
         st.subheader("Expenses")
         # Generate number inputs for employee advances using list comprehension
-        employee_advances = [st.number_input(Text(name), min_value=0, step=100) for name in employee_names]
+        employee_advances = [st.number_input(Text(name), value=st.session_state.get(name, 0), min_value=0, step=100) for name in employee_names]
 
         # Generate number input for cleaning expenses
-        cleaning = st.number_input(Text("Cleaning"), min_value=0, step=100)
+        cleaning = st.number_input(Text("Cleaning"), value=st.session_state.get('cleaning', 0), min_value=0, step=100)
 
        # Unified list of other expenses options
         other_expenses_options = ["Tea or Snacks ( டீ )", "Others (வேறு செலவு)", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"]
@@ -48,7 +48,7 @@ def form_tab():
             name_label = f"Other Expenses Name {offset}"
             amount_label = f"Other Expenses Amount {offset}"
             expense_name = st.selectbox(Text(name_label), other_expenses_options,index=idx, label_visibility="collapsed")
-            expense_amount = st.number_input(amount_label, min_value=0, step=100, label_visibility="collapsed")
+            expense_amount = st.number_input(amount_label, value=st.session_state.get(amount_label, 0), min_value=0, step=100, label_visibility="collapsed")
             other_expenses.append(expense_amount)
             other_expenses_names.append(expense_name)
 
@@ -65,24 +65,22 @@ def form_tab():
         denominations = [500, 200, 100, 50, 20, 10, 5]
 
         # Create a dictionary to store user input for each denomination
-        denomination_counts = {denom: st.number_input(Text(f"{denom} x"), min_value=0, step=1) for denom in denominations}
+        denomination_counts = {denom: st.number_input(Text(f"{denom} x"), value=st.session_state.get(f"{denom} x", 0), min_value=0, step=1) for denom in denominations}
 
         # Calculate the denomination total using list comprehension
         denomination_total = sum(count * value for count, value in denomination_counts.items())
 
         display_text(f"Total: ₹{denomination_total}")
 
-        cash_withdrawn = st.number_input(Text("Cash Withdrawn (பணம் எடுத்தது)"), min_value=0, step=100)
+        cash_withdrawn = st.number_input(Text("Cash Withdrawn (பணம் எடுத்தது)"), value=st.session_state.get('cash_withdrawn', 0), min_value=0, step=100)
 
         # Calculate closing cash and display
         closing_cash = denomination_total - cash_withdrawn
         
         display_text(f"Closing Cash: ₹{closing_cash}")
 
-        # Offset for denominations
-        offset = 100
-        if denomination_total < 500:
-            offset = 0
+        # Adjust for small cash amounts
+        offset = 100 if denomination_total < 500 else 0
         
         # Calculate total cash and cash difference
         total_cash = opening_cash + (total_sales_pos - paytm) - expenses_shop_total + offset
@@ -90,13 +88,8 @@ def form_tab():
         
         cash_difference_masked = cash_difference
 
-        # Set text color based on cash difference
-        if cash_difference > 100:
-            text_color = "red"
-        elif cash_difference > 0:
-            text_color = "blue"
-        else:
-            text_color = "green"
+        # Display data with dynamic styling based on cash difference
+        text_color = "red" if cash_difference > 100 else "blue" if cash_difference > 0 else "green"
             
         # Limit negative cash difference to -100
         if cash_difference < -100:
