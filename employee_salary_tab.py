@@ -2,9 +2,10 @@ import streamlit as st
 from data_management import load_data, load_employee_names
 import pandas as pd
 import os
+
 import datetime
 from datetime import date, datetime, timedelta
-from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv
+from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv,employee_salary_data_csv
 
 
 def display_data(dataframe, title):
@@ -24,6 +25,70 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
         updated_data = pd.concat([existing_data, new_frame], ignore_index=True)
         updated_data.to_csv(file_name, index=False)
     return pd.read_csv(file_name)  # Return updated data
+
+def load_salary_data():
+    try:
+        return pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=True)
+    except FileNotFoundError:
+        st.error("Salary data file is missing. Please ensure it exists in the correct location.")
+        return None
+
+def update_sales_data():
+    salary_data = load_salary_data()
+    if salary_data is None:
+        return  # Exit if the data couldn't be loaded
+    
+    salary_data['Month'] = pd.to_datetime(salary_data['Month']).dt.strftime('%d-%m-%Y')
+    # Sort the DataFrame by index in descending order
+    salary_data = salary_data.sort_values(by='Month', ascending=False)
+
+    st.write("### Update Total Sales Data")
+
+    # User selects the month and employee
+    months = salary_data['Month'].dt.strftime('%Y-%m').unique()
+    selected_month = st.selectbox("Select Month", options=months)
+    selected_employee = st.selectbox("Select Employee", options=salary_data['Employee'].unique())
+
+    # Filter data for selected month and employee
+    filtered_data = salary_data[(salary_data['Month'].dt.strftime('%Y-%m') == selected_month) & 
+                                (salary_data['Employee'] == selected_employee)]
+
+    if not filtered_data.empty:
+        current_sales = filtered_data.iloc[0]['Total Sales']
+        st.write(f"Current Total Sales for {selected_employee} in {selected_month}: {current_sales}")
+    else:
+        current_sales = 0
+        st.write(f"No sales data found for {selected_employee} in {selected_month}. You can add new data.")
+
+    # Allow user to enter new total sales
+    new_sales = st.number_input("Enter New Total Sales", value=int(current_sales))
+
+    if st.button("Update Sales"):
+        if filtered_data.empty:
+            # Add new entry
+            new_data = {
+                'Month': pd.Period(selected_month, freq='M').start_time,
+                'Employee': selected_employee,
+                'Bank Transfers': 0,
+                'Cash Withdrawn': 0,
+                'Total Salary Advance': 0,
+                'Total Sales': new_sales,
+                'Salary': new_sales / 2,
+                'Balance': new_sales / 2,
+                'Balance Todate': new_sales / 2  # Adjust according to actual calculation rules
+            }
+            salary_data = salary_data.append(new_data, ignore_index=True)
+        else:
+            # Update existing entry
+            salary_data.loc[filtered_data.index, 'Total Sales'] = new_sales
+            salary_data.loc[filtered_data.index, 'Salary'] = new_sales / 2
+
+        # Save updated data back to CSV
+        salary_data.to_csv(employee_salary_data_csv, index=False)
+        st.success("Sales data updated successfully.")
+        
+    display_data(salary_data,"Employee Salary")
+  
 
 def employee_salary_tab():
     st.title("Employee Salary Accounts")
@@ -80,6 +145,8 @@ def employee_salary_tab():
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
         employee_salary_Advance_bankTransfer = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
         display_data(employee_salary_Advance_bankTransfer,"Employee Advance Bank Transfer")
+    else:
+        st.error("File {employee_salary_Advance_bankTransfer_csv} is missing! Please check the CSV file path.")
 
     expected_columns = ["Date", employee_names_list[0], employee_names_list[1], employee_names_list[2], employee_names_list[3]]
     
@@ -88,6 +155,8 @@ def employee_salary_tab():
     else:
         employee_cash_withdrawn_data = data_copy[expected_columns]
         display_data(employee_cash_withdrawn_data,"Employee Cash Advance")
+        
+    update_sales_data()
     
    
 

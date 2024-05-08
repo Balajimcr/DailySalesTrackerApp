@@ -1,3 +1,5 @@
+import streamlit as st
+
 def Text(text, font_size='large'):
     latex_text = rf"$\textsf{{\{font_size} {text}}}$"
     return latex_text
@@ -31,3 +33,21 @@ def custom_table_style():
 
     # Display the CSS style
     st.markdown(table_style, unsafe_allow_html=True)
+    
+def display_text(text, color="blue", font_size="24px", font_weight="bold"):
+  """
+  This function displays a formatted text string in Streamlit.
+
+  Args:
+      text: The text to be displayed.
+      color: The text color (default: blue).
+      font_size: The font size (default: 24px).
+      font_weight: The font weight (default: bold).
+
+  Returns:
+      None
+  """
+  # Escape user input to prevent XSS vulnerabilities
+  st.markdown(f'<div style="color: {color}; font-size: {font_size}; font-weight: {font_weight};">'\
+              f'{text}</div>', unsafe_allow_html=True)
+

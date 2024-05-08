@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import random
 from data_management import load_data, load_employee_names
-from ui_helpers import Text, tabs_font_css
+from ui_helpers import Text, tabs_font_css,display_text
 from datetime import date, datetime, timedelta
-from data_management import csv_file, employee_csv
+from data_management import csv_file
 
 def form_tab():
     # Initialize data, last closing cash, and employee names
@@ -21,82 +21,63 @@ def form_tab():
     # Data input fields in the left column
     with left_col:
         st.subheader("Sales")
-        #Date_Label = '<p style="color:Black; font-size: 24px;"></p>'
-        date_input = st.date_input(Text("Date (தேதி)"), value=date.today(), format="DD-MM-YYYY")
-        opening_cash = st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"),value=last_closing_cash, min_value=0, step=100)
+        date_input      = st.date_input(Text("Date (தேதி)"), value=date.today(), format="DD-MM-YYYY")
+        opening_cash    =  st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"),value=last_closing_cash, min_value=0, step=100)
         total_sales_pos = st.number_input(Text("Total Sales POS ( சேல்ஸ் )"), min_value=0, step=100)
-        paytm = st.number_input(Text("Paytm (பேடிஎம்)"), min_value=0, step=100)
+        paytm           = st.number_input(Text("Paytm (பேடிஎம்)"), min_value=0, step=100)
 
         # Expenses fields
         st.subheader("Expenses")
-        employee_1_advance = st.number_input(Text(employee_names[0]), min_value=0, step=100)
-        employee_2_advance = st.number_input(Text(employee_names[1]), min_value=0, step=100)
-        employee_3_advance = st.number_input(Text(employee_names[2]), min_value=0, step=100)
-        employee_4_advance = st.number_input(Text(employee_names[3]), min_value=0, step=100)
+        # Generate number inputs for employee advances using list comprehension
+        employee_advances = [st.number_input(Text(name), min_value=0, step=100) for name in employee_names]
+
+        # Generate number input for cleaning expenses
         cleaning = st.number_input(Text("Cleaning"), min_value=0, step=100)
 
-        # Combo box for other expenses with hidden label
-        other_expenses_name = st.selectbox(Text("Other Expenses Name"), 
-                                        ["Tea or Snacks ( டீ )", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"],
-                                        label_visibility="collapsed")
-        other_expenses_amount = st.number_input("Other Expenses Amount", min_value=0, step=100, label_visibility="collapsed")
+       # Unified list of other expenses options
+        other_expenses_options = ["Tea or Snacks ( டீ )", "Others (வேறு செலவு)", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"]
 
-        other_expenses_name_1 = st.selectbox(Text("Other Expenses Name 1"), 
-                                            ["Others (வேறு செலவு)", "Flower ( பூ )", "Corporation ( கார்பொரேஷன் )", "Paper ( பேப்பர் )"],
-                                            label_visibility="collapsed")
-        other_expenses_amount_1 = st.number_input("Other Expenses Amount 1", min_value=0, step=100, label_visibility="collapsed")
+        # Initialize a list to collect the amounts of other expenses
+        other_expenses_names = []
+        other_expenses = []
+
+        # Loop through a range to create multiple expense inputs using an offset
+        number_of_expense_inputs = 2  # Adjust the number as needed
+        for idx in range(number_of_expense_inputs):
+            offset = idx + 1  # Start indexing from 1
+            name_label = f"Other Expenses Name {offset}"
+            amount_label = f"Other Expenses Amount {offset}"
+            expense_name = st.selectbox(Text(name_label), other_expenses_options,index=idx, label_visibility="collapsed")
+            expense_amount = st.number_input(amount_label, min_value=0, step=100, label_visibility="collapsed")
+            other_expenses.append(expense_amount)
+            other_expenses_names.append(expense_name)
 
         # Calculate and display total expenses
-        expenses_shop_total = (
-            employee_1_advance
-            + employee_2_advance
-            + employee_3_advance
-            + employee_4_advance
-            + cleaning
-            + other_expenses_amount
-            + other_expenses_amount_1
-        )
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Expenses: ₹{expenses_shop_total}</div>',
-            unsafe_allow_html=True
-        )
+        expenses_shop_total = sum(employee_advances) + cleaning + sum(other_expenses)
+
+        display_text(f"Total Expenses: ₹{expenses_shop_total}")
 
 
     # Denominations in the right column
     with right_col:
         st.subheader("Denominations")
-        denom_500 = st.number_input(Text("500 x"), min_value=0, step=1)
-        denom_200 = st.number_input(Text("200 x"), min_value=0, step=1)
-        denom_100 = st.number_input(Text("100 x"), min_value=0, step=1)
-        denom_50  = st.number_input(Text("50 x"), min_value=0, step=1)
-        denom_20  = st.number_input(Text("20 x"), min_value=0, step=1)
-        denom_10  = st.number_input(Text("10 x"), min_value=0, step=1)
-        denom_5   = st.number_input(Text("5 x"), min_value=0, step=1)
+        # Define denominations and their corresponding values
+        denominations = [500, 200, 100, 50, 20, 10, 5]
 
-        # Calculate the denomination total
-        denomination_total = (
-            denom_500 * 500
-            + denom_200 * 200
-            + denom_100 * 100
-            + denom_50 * 50
-            + denom_20 * 20
-            + denom_10 * 10
-            + denom_5 * 5
-        )
+        # Create a dictionary to store user input for each denomination
+        denomination_counts = {denom: st.number_input(Text(f"{denom} x"), min_value=0, step=1) for denom in denominations}
 
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total: ₹{denomination_total}</div>',
-            unsafe_allow_html=True
-        )
+        # Calculate the denomination total using list comprehension
+        denomination_total = sum(count * value for count, value in denomination_counts.items())
+
+        display_text(f"Total: ₹{denomination_total}")
 
         cash_withdrawn = st.number_input(Text("Cash Withdrawn (பணம் எடுத்தது)"), min_value=0, step=100)
 
         # Calculate closing cash and display
         closing_cash = denomination_total - cash_withdrawn
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Closing Cash: ₹{closing_cash}</div>',
-            unsafe_allow_html=True
-        )
+        
+        display_text(f"Closing Cash: ₹{closing_cash}")
 
         # Offset for denominations
         offset = 100
@@ -120,39 +101,15 @@ def form_tab():
         # Limit negative cash difference to -100
         if cash_difference < -100:
             cash_difference_masked = random.randint(1, 10) * 10
-            
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Sales: ₹{total_sales_pos}</div>',
-            unsafe_allow_html=True
-        )
         
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Cash: ₹{total_sales_pos - paytm}</div>',
-            unsafe_allow_html=True
-        )
-        
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Paytm: ₹{paytm}</div>',
-            unsafe_allow_html=True
-        )
-        
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Expenses: ₹{expenses_shop_total}</div>',
-            unsafe_allow_html=True
-        )
-        
-        st.markdown(
-            f'<div style="color: blue; font-size: 24px; font-weight: bold;">Total Cash: ₹{total_cash}</div>',
-            unsafe_allow_html=True
-        )
-        
+        display_text(f"Total Sales: ₹{total_sales_pos}")
+        display_text(f"Cash: ₹{total_sales_pos - paytm}")
+        display_text(f"Paytm: ₹{paytm}")
+        display_text(f"Expenses: ₹{expenses_shop_total}")
+        display_text(f"Total Cash: ₹{total_cash}")
+        display_text(f"Closing Cash: ₹{closing_cash}")
         # Display cash difference with custom font size and color
-        font_size = "28px"
-        font_weight = "bold"
-        st.markdown(
-            f'<div style="color: {text_color}; font-size: {font_size}; font-weight: {font_weight};">Difference: ₹{cash_difference_masked}</div>',
-            unsafe_allow_html=True
-        )
+        display_text(f"Difference: ₹{cash_difference_masked}",color=text_color,font_size ="28px")
 
     # Submit button to handle form submission
     submit_button = st.button("Submit")
@@ -167,22 +124,22 @@ def form_tab():
             "Total Sales POS": total_sales_pos,
             "Paytm": paytm,
             "Cash Withdrawn": cash_withdrawn,
-            "Employee 1": employee_1_advance,
-            "Employee 2": employee_2_advance,
-            "Employee 3": employee_3_advance,
-            "Employee 4": employee_4_advance,
+            "Employee 1": employee_advances[0],
+            "Employee 2": employee_advances[1],
+            "Employee 3": employee_advances[2],
+            "Employee 4": employee_advances[3],
             "Cleaning": cleaning,
-            "Other Expenses Name": other_expenses_name,
-            "Other Expenses Amount": other_expenses_amount,
-            "Other Expenses Name_1": other_expenses_name_1,
-            "Other Expenses Amount_1": other_expenses_amount_1,
-            "500": denom_500,
-            "200": denom_200,
-            "100": denom_100,
-            "50": denom_50,
-            "20": denom_20,
-            "10": denom_10,
-            "5": denom_5,
+            "Other Expenses Name": other_expenses_names[0],
+            "Other Expenses Amount": other_expenses[0],
+            "Other Expenses Name_1": other_expenses_names[1],
+            "Other Expenses Amount_1": other_expenses[1],
+            "500": denomination_counts[500],
+            "200": denomination_counts[200],
+            "100": denomination_counts[100],
+            "50": denomination_counts[50],
+            "20": denomination_counts[20],
+            "10": denomination_counts[10],
+            "5": denomination_counts[5],
             "Cash Difference": cash_difference,
             "Closing Cash": closing_cash,
         }
@@ -193,18 +150,12 @@ def form_tab():
         # Check if cash_withdrawn is greater than the available cash in denominations
         if cash_withdrawn > denomination_total:
             Pass = False
-            st.markdown(
-                f'<div style="color: Red; font-size: {font_size}; font-weight: {font_weight};"> [Error] Cash Withdrawn is wrong! {cash_withdrawn} > {denomination_total} </div>',
-                unsafe_allow_html=True
-            )
+            display_text(f"[Error] Cash Withdrawn is wrong! {cash_withdrawn} > {denomination_total}",color="red",font_size ="28px")
             
         if abs(cash_difference) > 1000:
             Pass = False
-            st.markdown(
-                f'<div style="color: Red; font-size: {font_size}; font-weight: {font_weight};"> [Error] High Cash Difference : {cash_difference}! Call Owner  </div>',
-                unsafe_allow_html=True
-            )
-
+            display_text(f"[Error] High Cash Difference : {cash_difference}! Call Owner",color="red",font_size ="28px")
+            
         # If the checks passed, proceed to add new data and save it
         if Pass:
             # Use pd.concat() to add the new row to the existing data
