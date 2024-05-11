@@ -55,3 +55,11 @@ def display_data(dataframe, title):
     """Display a dataframe with a title."""
     st.markdown(f'<div style="color: black; font-size: 24px; font-weight: bold;">{title}:</div>', unsafe_allow_html=True)
     st.dataframe(dataframe)
+    
+def displayhtml_data(data, title):
+    # Applying the style to the dataframe
+    """Display a dataframe with a title."""
+    st.markdown(f'<div style="color: black; font-size: 24px; font-weight: bold;">{title}:</div>', unsafe_allow_html=True)
+    styled_data = data
+    html = styled_data.to_html(escape=False)
+    st.write(html, unsafe_allow_html=True)  # Display the styled DataFrame as HTML

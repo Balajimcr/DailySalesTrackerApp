@@ -29,7 +29,7 @@ def load_employee_details():
         return pd.DataFrame(columns=["Name", "Mobile No", "DOJ"])
 
 def save_employee_details(data):
-    data.to_csv(employee_csv, index=False)
+    data.to_csv(employee_csv, index=False,encoding="utf-16-le")
 
 def display_employee_details():
     st.title("Employee Details")

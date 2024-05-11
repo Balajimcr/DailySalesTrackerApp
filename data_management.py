@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+import hashlib
 import pandas as pd  # Make sure pandas is imported
 
 UserDirectoryPath = "Data/EliteSalonLalgudi/"
@@ -41,4 +42,7 @@ def load_data():
         ])
         last_closing_cash = 0
     return data, last_closing_cash
+
+def save_data(data):
+    data.to_csv(csv_file, index=False)
 
