@@ -37,13 +37,6 @@ def load_salary_data():
 def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     """
     Aggregate financial data month-wise for bank transfers and cash withdrawals.
-
-    Args:
-    - bank_transfer_df (DataFrame): Data containing bank transfer details.
-    - cash_withdrawn_df (DataFrame): Data containing cash withdrawn details.
-
-    Returns:
-    - DataFrame: Aggregated financial data per month and employee.
     """
     # Convert date strings to datetime objects for easier manipulation
     bank_transfer_df['Date'] = pd.to_datetime(bank_transfer_df['Date'], dayfirst=True)
@@ -53,8 +46,7 @@ def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     monthly_bank_transfers = bank_transfer_df.groupby(['Employee', pd.Grouper(key='Date', freq='M')]).sum().reset_index()
     monthly_bank_transfers['Month'] = monthly_bank_transfers['Date'].dt.strftime('%b-%Y')
     monthly_bank_transfers.rename(columns={'Amount': 'Monthly Bank Transfers', 'Employee': 'Employee Name'}, inplace=True)
-    monthly_bank_transfers.drop(columns=['Date'])
-    monthly_bank_transfers = monthly_bank_transfers.reindex(columns=["Month", "Employee Name",'Monthly Bank Transfers'])
+    monthly_bank_transfers.drop(columns=['Date','Comments'], inplace=True)  # Correctly drop the Date column
 
     # Melt cash_withdrawn_df to make it long format, preparing it for grouping
     melted_cash_withdrawn = pd.melt(cash_withdrawn_df, id_vars=['Date'], var_name='Employee Name', value_name='Amount')
@@ -71,9 +63,13 @@ def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     # Fill NaN values with 0 for the Monthly Bank Transfers column
     financial_summary['Monthly Bank Transfers'].fillna(0, inplace=True)
     
-    #display_data(monthly_bank_transfers,"Monthly Bank Transfers")
-    #display_data(monthly_cash_withdrawn,"Monthly Cash Withdrawn")
-    display_data(financial_summary,"Monthly Financial Summary")
+    # Calculate Total Salary Advance
+    financial_summary['Total Salary Advance'] = financial_summary['Monthly Bank Transfers'] + financial_summary['Monthly Cash Withdrawn']
+    
+    # Display intermediate results for debugging
+    display_data(monthly_bank_transfers, "Monthly Bank Transfers")
+    display_data(monthly_cash_withdrawn, "Monthly Cash Withdrawn")
+    display_data(financial_summary, "Monthly Financial Summary")
 
     return financial_summary
 
@@ -148,73 +144,80 @@ def update_sales_data():
     
     return salary_data
   
+def calculate_financials(month, employee, financial_summary, employee_salary_data, previous_balances):
+    """
+    Compute financial details for each employee for a given month, updating the previous balance.
 
-def calculate_financials(month, employee, adv_bank_transfer_df, cash_withdrawn_df, previous_balances):
-    """Compute financial details for each employee for a given month."""
-    salary_data = load_salary_data()
+    Args:
+    - month (str): The month in 'Mon-YYYY' format.
+    - employee (str): The name of the employee.
+    - financial_summary (pd.DataFrame): DataFrame containing financial summaries.
+    - employee_salary_data (pd.DataFrame): DataFrame containing employee salary data.
+    - previous_balances (dict): Dictionary holding previous balance till date for each employee.
+
+    Returns:
+    - dict: A dictionary with calculated financial details for the employee.
+    """
+    # Filter the data for the specific month and employee
+    financials = financial_summary[(financial_summary['Employee Name'] == employee) &
+                                   (financial_summary['Month'] == month)]
+    salary_info = employee_salary_data[(employee_salary_data['Employee Name'] == employee) &
+                                       (employee_salary_data['Month'] == month)]
+
+    # Compute financial metrics
+    monthly_cash_withdrawn = financials['Monthly Cash Withdrawn'].sum()
+    monthly_bank_transfers = financials['Monthly Bank Transfers'].sum()
+    total_salary_advance = financials['Total Salary Advance'].sum()
+    monthly_sales = salary_info['Total Sales'].sum()
+    salary = monthly_sales / 2  # Assuming salary is half of the sales
     
-    # Filter data for the specific month and employee
-    bank_transfers = adv_bank_transfer_df[(adv_bank_transfer_df['Date'] == month) & 
-                                          (adv_bank_transfer_df['Employee'] == employee)]
-    cash_withdrawals = cash_withdrawn_df[(cash_withdrawn_df['Date'] == month) & 
-                                         (cash_withdrawn_df['Employee'] == employee)]
+    # Get the previous balance if it exists, otherwise start from 0
+    previous_balance = previous_balances.get(f"{month}-{employee}", 0)
 
-    # Sum total advances and withdrawals
-    total_bank_transfers = bank_transfers['Amount'].sum()
-    total_cash_withdrawn = cash_withdrawals['Amount'].sum()
+    # Calculate the current balance and update for this month
+    balance = total_salary_advance - salary
+    balance_till_date = previous_balance + balance
 
-    # Total advances
-    total_advances = total_bank_transfers + total_cash_withdrawn
-    
-    # Fetch sales data
-    # Assuming sales data includes a column 'Total Sales' for each employee per month
-    sales_info = salary_data[(salary_data['Month'] == month) & (salary_data['Employee'] == employee)]
-    total_sales = sales_info['Total Sales'].sum() if not sales_info.empty else 0
-
-    # Salary calculations based on sales
-    salary = total_sales / 2  # Assuming salary is half of the sales
-
-    # Fetch previous balance; if not available, initialize to 0
-    prev_month_key = (datetime.strptime(month, '%b-%Y') - pd.DateOffset(months=1)).strftime('%b-%Y')
-    prev_balance_key = f"{prev_month_key}-{employee}"
-    previous_balance = previous_balances.get(prev_balance_key, 0)
-
-    # Compute current balance and update for this month
-    balance_curr = total_advances - salary
-    balance_till_date = previous_balance + balance_curr
-
-    # Store the current balance till date for future use
-    current_month_key = f"{month}-{employee}"
-    previous_balances[current_month_key] = balance_till_date
+    # Update the previous balances dictionary for the next month
+    next_month = (pd.to_datetime(month, format='%b-%Y') + pd.DateOffset(months=1)).strftime('%b-%Y')
+    previous_balances[f"{next_month}-{employee}"] = balance_till_date
 
     return {
-        "Total Bank Transfers": total_bank_transfers,
-        "Total Cash Withdrawn": total_cash_withdrawn,
-        "Total Sales": total_sales,
+        "Month": month,
+        "Employee": employee,
+        "Monthly Cash Withdrawn": monthly_cash_withdrawn,
+        "Monthly Bank Transfers": monthly_bank_transfers,
+        "Total Salary Advance": total_salary_advance,
+        "Monthly Sales": monthly_sales,
         "Salary": salary,
-        "Balance Current": balance_curr,
+        "Balance Current": balance,
         "Balance Till Date": balance_till_date
     }
 
+def update_financial_records_over_time(start_month, end_month, employees, financial_summary, employee_salary_data):
+    """
+    Update financial records over a specified range of months for all employees.
 
-def update_financials_over_time(start_month, end_month, employees, adv_bank_transfer_df, cash_withdrawn_df):
-    """Update financial records over a range of months."""
+    Args:
+    - start_month (str): Start month in 'Mon-YYYY' format.
+    - end_month (str): End month in 'Mon-YYYY' format.
+    - employees (list): List of employee names.
+    - financial_summary (pd.DataFrame): DataFrame containing financial summaries.
+    - employee_salary_data (pd.DataFrame): DataFrame containing employee salary data.
+
+    Returns:
+    - pd.DataFrame: DataFrame with computed financial details over the specified months.
+    """
     month_range = pd.date_range(start=start_month, end=end_month, freq='MS').strftime('%b-%Y')
     results = []
-    
-    # Dictionary to store balance till date for each month and employee
     previous_balances = {}
 
     for month in month_range:
         for employee in employees:
-            results.append({
-                "Month": month,
-                "Employee": employee,
-                **calculate_financials(month, employee, adv_bank_transfer_df, cash_withdrawn_df,previous_balances)
-            })
+            financial_details = calculate_financials(month, employee, financial_summary, employee_salary_data, previous_balances)
+            results.append(financial_details)
 
     return pd.DataFrame(results)
-
 
 def employee_salary_tab():
     st.title("Employee Salary Accounts")
@@ -300,6 +303,16 @@ def employee_salary_tab():
     
     financial_summary = aggregate_financials(adv_bank_transfer_df, cash_withdrawn_df)
     
-     # Merge the DataFrames on 'Month' and 'Employee Name'
-    financial_summary = pd.merge(financial_summary, employee_Salary_data, on=['Month', 'Employee Name'], how='left')
+    # Assuming financial_summary and employee_salary_data are loaded and prepared
+    Employee_Salary_data = update_financial_records_over_time(start_month, end_month, employees, financial_summary, employee_Salary_data)
+    
+    # Add a select box to choose an employee
+    selected_employee = st.selectbox("Select an Employee", options=Employee_Salary_data['Employee'].unique())
+    
+    # Filter the DataFrame to show only the selected employee's data
+    employee_specific_salary_data = Employee_Salary_data[Employee_Salary_data['Employee'] == selected_employee]
+
+    displayhtml_data(employee_specific_salary_data,"Employee Salary Data")
+    
+    
     
