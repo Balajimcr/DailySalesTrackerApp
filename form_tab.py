@@ -10,6 +10,23 @@ def form_tab():
     # Initialize data, last closing cash, and employee names
     data, last_closing_cash = load_data()
     employee_names = load_employee_names()
+    
+    # Ensure last_closing_cash is an integer
+    if last_closing_cash is None:
+        last_closing_cash = 0
+    else:
+        try:
+            last_closing_cash = int(last_closing_cash)  # Convert to integer if it's not
+        except ValueError:
+            last_closing_cash = 0  # Default to 0 if conversion fails
+
+    # When retrieving from session_state, also convert to integer to ensure type safety
+    opening_cash_value = st.session_state.get('opening_cash', last_closing_cash)
+    if opening_cash_value is not None:
+        try:
+            opening_cash_value = int(opening_cash_value)  # Convert to int to avoid type issues
+        except ValueError:
+            opening_cash_value = last_closing_cash  # Fallback to last_closing_cash if conversion fails
 
     st.title("Elite Salon Daily Accounts")
 
