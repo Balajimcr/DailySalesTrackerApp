@@ -311,8 +311,10 @@ def employee_salary_tab():
     
     # Filter the DataFrame to show only the selected employee's data
     employee_specific_salary_data = Employee_Salary_data[Employee_Salary_data['Employee'] == selected_employee]
+    
+    #employee_specific_salary_data = employee_specific_salary_data['Month','Employee','Monthly Bank Transfers','Monthly Cash Withdrawn','Total Salary Advance','Monthly Sales','Salary','Balance Current','Balance Till Date']
 
-    displayhtml_data(employee_specific_salary_data,"Employee Salary Data")
+    display_data(employee_specific_salary_data,"Employee Salary Data")
     
     
     
