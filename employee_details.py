@@ -1,4 +1,5 @@
 import streamlit as st
+from ui_helpers import display_data,displayhtml_data
 from data_management import load_data, load_employee_names
 import pandas as pd
 import streamlit as st
@@ -29,7 +30,7 @@ def load_employee_details():
         return pd.DataFrame(columns=["Name", "Mobile No", "DOJ"])
 
 def save_employee_details(data):
-    data.to_csv(employee_csv, index=False,encoding="utf-16-le")
+    data.to_csv(employee_csv, index=False,encoding="utf-8")
 
 def display_employee_details():
     st.title("Employee Details")
@@ -56,9 +57,9 @@ def display_employee_details():
             save_employee_details(data)
             st.success("Employee details updated successfully!")
 
+    data['Mobile No'] = data['Mobile No'].astype(str)
     # Display updated data
-    custom_table_style()
-    st.dataframe(data)
+    displayhtml_data(data,"Employee Details")
 
 def employee_details_tab():
     display_employee_details()

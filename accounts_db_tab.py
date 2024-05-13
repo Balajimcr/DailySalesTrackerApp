@@ -38,6 +38,8 @@ def display_last_entry(data,index, employees):
         # Get the first row of the DataFrame (most recent entry)
         top_entry = data.iloc[index]
         top_entry['Date'] = pd.to_datetime(top_entry['Date'], dayfirst=True).strftime('%d-%b-%Y (%A)')
+        
+        employees = [employeeName.split("-")[0].strip() for employeeName in employees]
 
         # Define entries for column 0 and column 1
         col0_entries = [
