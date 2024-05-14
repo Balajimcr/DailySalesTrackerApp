@@ -38,7 +38,7 @@ def login():
     if login_button and pin_no:
         pin_no_hash = hashlib.sha256(pin_no.encode()).hexdigest()
         if pin_no_hash == USER_DATA['Pin_No']:  # Corrected the key here
-            st.session_state['logged_in'] = True
+            set_logged_in(True)
             st.success("Login successful!")
             return True
         else:
