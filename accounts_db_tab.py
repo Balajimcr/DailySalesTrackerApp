@@ -3,8 +3,42 @@ import pandas as pd
 import hashlib
 import datetime
 from ui_helpers import display_text
-from data_management import load_employee_names
+from data_management import load_employee_names,UserDirectoryPath
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
+
+import base64
+import os
+import pandas as pd
+
+def get_file_path(directory, filename):
+    return os.path.join(directory, filename)
+
+def download_link(object_to_download, download_filename, download_link_text):
+    """
+    Generates a link to download the given object_to_download.
+    """
+    if isinstance(object_to_download, pd.DataFrame):
+        object_to_download = object_to_download.to_csv(index=False)
+    
+    b64 = base64.b64encode(object_to_download.encode()).decode()
+    return f'<a href="data:file/csv;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
+
+def DownloadFiles():
+    # Directory containing the CSV files
+    directory = UserDirectoryPath
+    
+    # List all CSV files in the directory
+    files = [file for file in os.listdir(directory) if file.endswith('.csv')]
+    
+    # Create a select box to choose a file
+    file_to_download = st.selectbox('Select a CSV file to download:', files)
+    
+    # Create a button to download the selected file
+    if st.button('Download CSV file'):
+        file_path = get_file_path(directory, file_to_download)
+        df = pd.read_csv(file_path)
+        tmp_download_link = download_link(df, file_to_download, 'Click here to download your CSV!')
+        st.markdown(tmp_download_link, unsafe_allow_html=True)
 
 def display_data(data):
     def highlight_difference(val):
@@ -108,8 +142,6 @@ def accounts_db_tab():
             data['Date'] = pd.to_datetime(data['Date'])
             data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
             data['Date'] = data['Date'].dt.strftime('%d-%m-%Y')  # Format the date for display after sorting
-        
-        
 
         expected_columns = ["Date", "Opening Cash", "Closing Cash", "Cash Difference", "Total Sales POS", "Paytm", "Total Cash", "Denomination Total", "Cash Withdrawn"]
         
@@ -141,6 +173,8 @@ def accounts_db_tab():
             
         elif delete_button_clicked:
             st.error("Incorrect password.")
+            
+        DownloadFiles()
 
         display_data(data[expected_columns])
     else:
