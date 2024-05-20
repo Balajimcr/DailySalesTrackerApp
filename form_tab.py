@@ -97,7 +97,7 @@ def form_tab():
         display_text(f"Closing Cash: ₹{closing_cash}")
 
         # Adjust for small cash amounts
-        offset = 100 if denomination_total < 500 else 0
+        offset = 100 if denomination_total > 500 else 50
         
         # Calculate total cash and cash difference
         total_cash = opening_cash + (total_sales_pos - paytm) - expenses_shop_total + offset

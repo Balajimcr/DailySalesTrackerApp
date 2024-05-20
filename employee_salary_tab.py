@@ -272,8 +272,11 @@ def employee_salary_tab():
         save_data_to_csv(new_entry)
     
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
-        employee_salary_Advance_bankTransfer = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
-        display_data(employee_salary_Advance_bankTransfer,"Employee Advance Bank Transfer")
+        data = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
+        data['Date'] = pd.to_datetime(data['Date'])
+        data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
+        data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
+        display_data(data,"Employee Advance Bank Transfer")
     else:
         st.error("File {employee_salary_Advance_bankTransfer_csv} is missing! Please check the CSV file path.")
 
@@ -285,7 +288,11 @@ def employee_salary_tab():
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
         employee_cash_withdrawn_data = employee_sa_cash_withdrawn[expected_columns]
-        display_data(employee_cash_withdrawn_data,"Employee Cash Advance")
+        data = employee_cash_withdrawn_data.copy()
+        data['Date'] = pd.to_datetime(data['Date'])
+        data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
+        data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
+        display_data(data,"Employee Cash Advance")
         
     employee_Salary_data = update_sales_data()
     
