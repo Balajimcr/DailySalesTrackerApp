@@ -29,10 +29,39 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
 
 def load_salary_data():
     try:
-        return pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=False)
+        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=False)
     except FileNotFoundError:
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
+    
+    # Check if the current month is present in the data
+    current_month = datetime.now().strftime('%Y-%m-01')
+    if current_month not in salary_data['Month'].dt.strftime('%Y-%m-01').unique():
+        # Add the new current month for each employee
+        new_month_data = []
+        for employee in salary_data['Employee Name'].unique():
+            new_month_data.append({
+                'Month': current_month,
+                'Employee Name': employee,
+                'Monthly Bank Transfers': 0,
+                'Monthly Cash Withdrawn': 0,
+                'Total Salary Advance': 0,
+                'Total Sales': 0,
+                'Salary': 0,
+                'Balance': 0,
+                'Balance Till date': 0
+            })
+        new_month_df = pd.DataFrame(new_month_data)
+        salary_data = pd.concat([salary_data, new_month_df], ignore_index=True)
+        salary_data['Month'] = pd.to_datetime(salary_data['Month'])  # Convert 'Month' to datetime format
+        salary_data['Month'] = salary_data['Month'].dt.strftime('%Y-%m-01')
+        salary_data.to_csv(employee_salary_data_csv, index=False, encoding="utf-8")
+        
+    # Sort the months in descending order
+    salary_data['Month'] = pd.to_datetime(salary_data['Month'])
+    salary_data = salary_data.sort_values('Month', ascending=False)
+        
+    return salary_data
     
 def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     """
