@@ -9,6 +9,7 @@ csv_file = UserDirectoryPath +"database_collection.csv"
 employee_csv = UserDirectoryPath +"Employee_data.csv"
 employee_salary_Advance_bankTransfer_csv = UserDirectoryPath +"employee_salary_Advance_bankTransfer_data.csv"
 employee_salary_data_csv = UserDirectoryPath +"employee_salary_data.csv"
+credentials_path = UserDirectoryPath +"credentials.json"
 
 def load_employee_names():
     try:
@@ -23,6 +24,18 @@ def load_data():
     try:
         data = pd.read_csv(csv_file)
         data['Date'] = pd.to_datetime(data['Date'], errors='coerce', dayfirst=True)
+        
+        data["Closing Cash"] = pd.to_numeric(data["Closing Cash"], errors='coerce', downcast="integer")
+        # Exclude 'Date' from conversion (assuming it's already a datetime)
+        numeric_cols = [col for col in data.columns if col != 'Date']
+
+        # Attempt conversion to numeric (integers) with error handling
+        for col in numeric_cols:
+            try:
+                data[col] = pd.to_numeric(data[col], errors='coerce', downcast="integer")
+            except:
+                print(f"Warning: Error converting column {col} to numeric (integers).")
+        
         data.sort_values(by='Date', inplace=True)
         today_date = datetime.combine(datetime.today().date(), datetime.min.time())
         filtered_data = data[data['Date'] < today_date].copy()

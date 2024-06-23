@@ -5,6 +5,7 @@ from data_management import load_data, load_employee_names
 from ui_helpers import Text, tabs_font_css,display_text
 from datetime import date, datetime, timedelta
 from data_management import csv_file
+from accounts_db_tab import sync_all_csv_files
 
 def form_tab():
     # Initialize data, last closing cash, and employee names
@@ -126,32 +127,32 @@ def form_tab():
 
     if submit_button:
         new_row = {
-            "Date": date_input.strftime('%d-%m-%Y'),  # Only use the date part
-            "Opening Cash": opening_cash,
-            "Expenses Shop": expenses_shop_total,
-            "Denomination Total": denomination_total,
-            "Total Cash": total_cash,
-            "Total Sales POS": total_sales_pos,
-            "Paytm": paytm,
-            "Cash Withdrawn": cash_withdrawn,
-            "Employee 1": employee_advances[0],
-            "Employee 2": employee_advances[1],
-            "Employee 3": employee_advances[2],
-            "Employee 4": employee_advances[3],
-            "Cleaning": cleaning,
+            "Date": date_input.strftime('%d-%m-%Y'),  # Only use the date part (keep as string)
+            "Opening Cash": int(opening_cash),  # Assuming whole rupee values
+            "Expenses Shop": int(expenses_shop_total),
+            "Denomination Total": int(denomination_total),
+            "Total Cash": int(total_cash),
+            "Total Sales POS": int(total_sales_pos),
+            "Paytm": int(paytm),  
+            "Cash Withdrawn": int(cash_withdrawn),  
+            "Employee 1": int(employee_advances[0]),
+            "Employee 2": int(employee_advances[1]),
+            "Employee 3": int(employee_advances[2]),
+            "Employee 4": int(employee_advances[3]),
+            "Cleaning": int(cleaning),
             "Other Expenses Name": other_expenses_names[0],
-            "Other Expenses Amount": other_expenses[0],
+            "Other Expenses Amount": int(other_expenses[0]),
             "Other Expenses Name_1": other_expenses_names[1],
-            "Other Expenses Amount_1": other_expenses[1],
-            "500": denomination_counts[500],
-            "200": denomination_counts[200],
-            "100": denomination_counts[100],
-            "50": denomination_counts[50],
-            "20": denomination_counts[20],
-            "10": denomination_counts[10],
-            "5": denomination_counts[5],
-            "Cash Difference": cash_difference,
-            "Closing Cash": closing_cash,
+            "Other Expenses Amount_1": int(other_expenses[1]),
+            "500": int(denomination_counts[500]),
+            "200": int(denomination_counts[200]),
+            "100": int(denomination_counts[100]),
+            "50": int(denomination_counts[50]),
+            "20": int(denomination_counts[20]),
+            "10": int(denomination_counts[10]),
+            "5": int(denomination_counts[5]),
+            "Cash Difference": int(cash_difference),
+            "Closing Cash": int(closing_cash),
         }
         
         # Default to True indicating data is valid to submit
@@ -178,3 +179,15 @@ def form_tab():
 
             st.success("Data submitted successfully!")
             st.balloons()
+            sync_all_csv_files()
+            st.success("Data synchronized successfully!")
+            
+    # Submit button to handle form submission
+    Sync_button = st.button("Sync")
+
+    if Sync_button:
+        sync_all_csv_files()
+
+        st.success("Data synchronized successfully!")
+        st.balloons()
+

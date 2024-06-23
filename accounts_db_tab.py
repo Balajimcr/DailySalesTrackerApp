@@ -3,13 +3,112 @@ import pandas as pd
 import hashlib
 import datetime
 from ui_helpers import display_text
-from data_management import load_employee_names,UserDirectoryPath
+from data_management import load_employee_names,UserDirectoryPath,credentials_path,csv_file
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
 
-import base64
-import os
+import gspread
+from google.oauth2.service_account import Credentials
 import pandas as pd
+import os
 
+import os
+from google.oauth2.service_account import Credentials
+from gspread import authorize
+
+def open_google_sheet(sheet_url):
+  """Opens a Google Sheet using the provided URL and credentials path.
+
+  Args:
+      sheet_url: The URL of the Google Sheet to open.
+      credentials_path: The path to the service account credentials file in JSON format.
+
+  Returns:
+      A gspread.Worksheet object representing the opened Google Sheet.
+
+  Raises:
+      FileNotFoundError: If the credentials file is not found.
+  """
+
+  # Check if the credentials file exists
+  if not os.path.isfile(credentials_path):
+    raise FileNotFoundError(f"Error: Credentials file not found at '{credentials_path}'.")
+  else:
+    print("Credentials file at '{credentials_path}")
+
+  # Load credentials from the file
+  creds = Credentials.from_service_account_file(credentials_path, scopes=['https://www.googleapis.com/auth/spreadsheets'])
+
+  # Open the Google Sheet using the URL
+  client = authorize(creds)
+  return client.open_by_url(sheet_url)
+  
+def sync_csv_to_google_sheet(csv_path, sheet, sheet_name):
+  """Synchronizes data from a CSV file to a Google Sheet, handling potential JSON conversion errors.
+
+  Args:
+      csv_path: The path to the CSV file.
+      sheet: The Google Sheet object.
+      sheet_name: The name of the sheet to update.
+
+  Prints a message indicating the sheet being processed and any encountered errors.
+  """
+
+  try:
+    # Read the CSV with default data types (attempt JSON conversion)
+    df = pd.read_csv(csv_path)
+
+    # Update the sheet with the DataFrame data
+    worksheet = sheet.worksheet(sheet_name)
+    worksheet.clear()
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+    print(f"Processing Sheet: {sheet_name} - Successful")
+
+  except Exception as e:
+    # Error handling for JSON conversion issues
+    print(f"Processing Sheet: {sheet_name} - Encountered JSON conversion error: {e}")
+
+    # Fallback: Read as strings if error occurs
+    df = pd.read_csv(csv_path, dtype=str)
+    df = df.fillna('')
+    worksheet = sheet.worksheet(sheet_name)
+    worksheet.clear()
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+    print(f"Processing Sheet: {sheet_name} (Retried as Text)")
+
+
+# Function to sync all CSV files (updated to use corrected paths)
+def sync_all_csv_files():
+    google_sheet_url = 'https://docs.google.com/spreadsheets/d/1XDDHUH76Gqs8svscQFASrqQ2rg5t2ufkZB1IA3W4jJw/edit?gid=0#gid=0'
+    sheet = open_google_sheet(google_sheet_url)
+
+    csv_files_and_sheets = {
+        'database_collection.csv': 'Database',
+        'employee_salary_Advance_bankTransfer_data.csv': 'EmployeeSalaryAdvance',
+        'employee_salary_data.csv': 'EmployeeSalaryData'
+    }
+
+    directory = os.path.join(UserDirectoryPath)  # Corrected directory path
+
+    for csv_file, sheet_name in csv_files_and_sheets.items():
+        csv_path = os.path.join(directory, csv_file)
+        sync_csv_to_google_sheet(csv_path, sheet, sheet_name)
+        
+        # Check if the file exists
+        if os.path.isfile(csv_path):
+            sync_csv_to_google_sheet(csv_path, sheet, sheet_name)
+        else:
+            print(f"Warning: CSV file '{csv_file}' not found in '{directory}'. Skipping.")
+
+# Add sync_all_csv_files call to relevant part of your Streamlit app
+def save_data(data):
+    # Your logic to save data to CSV
+    data.to_csv(csv_file, index=False)
+    
+    # Call sync_all_csv_files after saving data
+    sync_all_csv_files()
+    
+    st.success("Data synchronized successfully to Google Sheets!")
+    
 def get_file_path(directory, filename):
     return os.path.join(directory, filename)
 
@@ -70,6 +169,18 @@ def display_last_entry(data,index, employees):
     """
     if not data.empty:
         # Get the first row of the DataFrame (most recent entry)
+        
+        numeric_cols = [col for col in data.columns if col != 'Date']
+
+        # Attempt conversion to numeric (integers) with error handling
+        for col in numeric_cols:
+            try:
+                data[col] = pd.to_numeric(data[col], errors='coerce', downcast="integer")
+            except:
+                print(f"Warning: Error converting column {col} to numeric (integers).")
+        
+        data["Closing Cash"] = pd.to_numeric(data["Closing Cash"], errors='coerce', downcast="integer")
+        
         top_entry = data.iloc[index]
         top_entry['Date'] = pd.to_datetime(top_entry['Date'], dayfirst=True).strftime('%d-%b-%Y (%A)')
         
