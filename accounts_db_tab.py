@@ -7,10 +7,6 @@ from data_management import load_employee_names,UserDirectoryPath,credentials_pa
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
 
 import gspread
-from google.oauth2.service_account import Credentials
-import pandas as pd
-import os
-
 import os
 from google.oauth2.service_account import Credentials
 from gspread import authorize
