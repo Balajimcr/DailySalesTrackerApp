@@ -6,96 +6,45 @@ from ui_helpers import display_text
 from data_management import load_employee_names,UserDirectoryPath,credentials_path,csv_file
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
 
-import gspread
+from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 import os
-from google.oauth2.service_account import Credentials
-from gspread import authorize
 
-def open_google_sheet(sheet_url):
-  """Opens a Google Sheet using the provided URL and credentials path.
+# Create a connection object.
+conn = st.connection("gsheets", type=GSheetsConnection)
 
-  Args:
-      sheet_url: The URL of the Google Sheet to open.
-      credentials_path: The path to the service account credentials file in JSON format.
-
-  Returns:
-      A gspread.Worksheet object representing the opened Google Sheet.
-
-  Raises:
-      FileNotFoundError: If the credentials file is not found.
-  """
-
-  # Check if the credentials file exists
-  if not os.path.isfile(credentials_path):
-    raise FileNotFoundError(f"Error: Credentials file not found at '{credentials_path}'.")
-  else:
-    print("Credentials file at '{credentials_path}")
-
-  # Load credentials from the file
-  creds = Credentials.from_service_account_file(credentials_path, scopes=['https://www.googleapis.com/auth/spreadsheets'])
-
-  # Open the Google Sheet using the URL
-  client = authorize(creds)
-  return client.open_by_url(sheet_url)
-  
-def sync_csv_to_google_sheet(csv_path, sheet, sheet_name):
-  """Synchronizes data from a CSV file to a Google Sheet, handling potential JSON conversion errors.
-
-  Args:
-      csv_path: The path to the CSV file.
-      sheet: The Google Sheet object.
-      sheet_name: The name of the sheet to update.
-
-  Prints a message indicating the sheet being processed and any encountered errors.
-  """
-
-  try:
-    # Read the CSV with default data types (attempt JSON conversion)
+def sync_csv_to_google_sheet(csv_path, sheet_name):
+    # Read the CSV file
     df = pd.read_csv(csv_path)
 
-    # Update the sheet with the DataFrame data
-    worksheet = sheet.worksheet(sheet_name)
-    worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
-    print(f"Processing Sheet: {sheet_name} - Successful")
+    # Clear the existing content in the worksheet
+    conn.clear(worksheet=sheet_name)
 
-  except Exception as e:
-    # Error handling for JSON conversion issues
-    print(f"Processing Sheet: {sheet_name} - Encountered JSON conversion error: {e}")
+    # Update the Google Sheet with new data
+    conn.update(worksheet=sheet_name, data=df)
 
-    # Fallback: Read as strings if error occurs
-    df = pd.read_csv(csv_path, dtype=str)
-    df = df.fillna('')
-    worksheet = sheet.worksheet(sheet_name)
-    worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
-    print(f"Processing Sheet: {sheet_name} (Retried as Text)")
-
+    #st.success(f"Successfully synced {csv_path} to Google Sheet: {sheet_name}")
 
 # Function to sync all CSV files (updated to use corrected paths)
 def sync_all_csv_files():
-    google_sheet_url = 'https://docs.google.com/spreadsheets/d/1XDDHUH76Gqs8svscQFASrqQ2rg5t2ufkZB1IA3W4jJw/edit?gid=0#gid=0'
-    sheet = open_google_sheet(google_sheet_url)
 
-    csv_files_and_sheets = {
-        'database_collection.csv': 'Database',
-        'employee_salary_Advance_bankTransfer_data.csv': 'EmployeeSalaryAdvance',
-        'employee_salary_data.csv': 'EmployeeSalaryData'
-    }
+  csv_files_and_sheets = {
+      'database_collection.csv': 'Database',
+      'employee_salary_Advance_bankTransfer_data.csv': 'EmployeeSalaryAdvance',
+      'employee_salary_data.csv': 'EmployeeSalaryData'
+  }
 
-    directory = os.path.join(UserDirectoryPath)  # Corrected directory path
+  directory = os.path.join(UserDirectoryPath)  # Corrected directory path
 
-    for csv_file, sheet_name in csv_files_and_sheets.items():
-        csv_path = os.path.join(directory, csv_file)
-        sync_csv_to_google_sheet(csv_path, sheet, sheet_name)
-        
-        # Check if the file exists
-        if os.path.isfile(csv_path):
-            sync_csv_to_google_sheet(csv_path, sheet, sheet_name)
-        else:
-            print(f"Warning: CSV file '{csv_file}' not found in '{directory}'. Skipping.")
+  for csv_file, sheet_name in csv_files_and_sheets.items():
+    csv_path = os.path.join(directory, csv_file)
 
-# Add sync_all_csv_files call to relevant part of your Streamlit app
+    # Check if the file exists
+    if os.path.isfile(csv_path):
+      sync_csv_to_google_sheet(csv_path, sheet_name)
+    else:
+      print(f"Warning: CSV file '{csv_file}' not found in '{directory}'. Skipping.")
+
 def save_data(data):
     # Your logic to save data to CSV
     data.to_csv(csv_file, index=False)
@@ -129,7 +78,8 @@ def DownloadFiles():
     file_to_download = st.selectbox('Select a CSV file to download:', files)
     
     # Create a button to download the selected file
-    if st.button('Download CSV file'):
+    if st.button('Sync CSV file'):
+        sync_all_csv_files()
         file_path = get_file_path(directory, file_to_download)
         df = pd.read_csv(file_path)
         tmp_download_link = download_link(df, file_to_download, 'Click here to download your CSV!')

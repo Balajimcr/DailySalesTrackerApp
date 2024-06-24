@@ -75,7 +75,7 @@ def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     monthly_bank_transfers = bank_transfer_df.groupby(['Employee', pd.Grouper(key='Date', freq='M')]).sum().reset_index()
     monthly_bank_transfers['Month'] = monthly_bank_transfers['Date'].dt.strftime('%b-%Y')
     monthly_bank_transfers.rename(columns={'Amount': 'Monthly Bank Transfers', 'Employee': 'Employee Name'}, inplace=True)
-    monthly_bank_transfers.drop(columns=['Date','Comments'], inplace=True)  # Correctly drop the Date column
+    monthly_bank_transfers.drop(columns=['Date','Comments'], inplace=True, errors='ignore')
 
     # Melt cash_withdrawn_df to make it long format, preparing it for grouping
     melted_cash_withdrawn = pd.melt(cash_withdrawn_df, id_vars=['Date'], var_name='Employee Name', value_name='Amount')
@@ -101,6 +101,48 @@ def aggregate_financials(bank_transfer_df, cash_withdrawn_df):
     display_data(financial_summary, "Monthly Financial Summary")
 
     return financial_summary
+
+def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
+    st.write("### Update Employee Salary Data CSV")
+
+    # Ensure the DataFrame has the correct column names
+    required_columns = ['Month', 'Employee Name', 'Monthly Bank Transfers', 'Monthly Cash Withdrawn', 
+                        'Total Salary Advance', 'Total Sales', 'Salary', 'Balance', 'Balance Till date']
+    
+    # Rename columns if necessary
+    column_mapping = {
+        'Employee': 'Employee Name',
+        'Balance Current': 'Balance',
+        'Balance Till Date': 'Balance Till date'
+    }
+    Employee_Salary_data = Employee_Salary_data.rename(columns=column_mapping)
+
+    # Ensure all required columns are present
+    for col in required_columns:
+        if col not in Employee_Salary_data.columns:
+            Employee_Salary_data[col] = 0  # Add missing columns with default value 0
+
+    # Reorder columns to match the required format
+    Employee_Salary_data = Employee_Salary_data[required_columns]
+
+    # Convert 'Month' to datetime and then to the required string format
+    Employee_Salary_data['Month'] = pd.to_datetime(Employee_Salary_data['Month']).dt.strftime('%Y-%m-%d')
+
+    # Sort the DataFrame by Month (descending) and then by Employee Name
+    Employee_Salary_data = Employee_Salary_data.sort_values(['Month', 'Employee Name'], ascending=[False, True])
+
+    # Display the data that will be saved
+    st.dataframe(Employee_Salary_data)
+
+    if st.button("Update CSV File"):
+        try:
+            # Save the DataFrame to CSV
+            Employee_Salary_data.to_csv(csv_file_path, index=False, encoding="utf-8")
+            st.success(f"CSV file updated successfully at {csv_file_path}")
+        except Exception as e:
+            st.error(f"An error occurred while saving the CSV file: {str(e)}")
+
+    return Employee_Salary_data
 
 def update_sales_data():
     salary_data = load_salary_data()
@@ -351,6 +393,8 @@ def employee_salary_tab():
     #employee_specific_salary_data = employee_specific_salary_data['Month','Employee','Monthly Bank Transfers','Monthly Cash Withdrawn','Total Salary Advance','Monthly Sales','Salary','Balance Current','Balance Till Date']
 
     display_data(employee_specific_salary_data,"Employee Salary Data")
+    
+    Employee_Salary_data = update_employee_salary_csv(Employee_Salary_data, employee_salary_data_csv)
     
     
     

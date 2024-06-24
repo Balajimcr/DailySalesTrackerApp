@@ -180,14 +180,5 @@ def form_tab():
             st.success("Data submitted successfully!")
             st.balloons()
             sync_all_csv_files()
-            st.success("Data synchronized successfully!")
-            
-    # Submit button to handle form submission
-    Sync_button = st.button("Sync")
-
-    if Sync_button:
-        sync_all_csv_files()
-
-        st.success("Data synchronized successfully!")
-        st.balloons()
+            st.success("Data synchronized successfully!")   
 
