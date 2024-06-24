@@ -6,6 +6,7 @@ from ui_helpers import display_text
 from data_management import load_employee_names,UserDirectoryPath,credentials_path,csv_file
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
 
+import base64
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 import os
