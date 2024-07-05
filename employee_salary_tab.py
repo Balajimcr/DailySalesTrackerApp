@@ -21,15 +21,15 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
         pd.DataFrame([new_data]).to_csv(file_name, index=False)
     else:
         # Load existing data and append new data
-        existing_data = pd.read_csv(file_name)
+        existing_data = pd.read_csv(file_name, parse_dates=['Date'], dayfirst=True)
         new_frame = pd.DataFrame([new_data])
         updated_data = pd.concat([existing_data, new_frame], ignore_index=True)
         updated_data.to_csv(file_name, index=False,encoding="utf-8")
-    return pd.read_csv(file_name)  # Return updated data
+    return pd.read_csv(file_name, parse_dates=['Date'], dayfirst=True)  # Return updated data
 
 def load_salary_data():
     try:
-        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=False)
+        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=True)
     except FileNotFoundError:
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
@@ -343,8 +343,8 @@ def employee_salary_tab():
         save_data_to_csv(new_entry)
     
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
-        data = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
-        data['Date'] = pd.to_datetime(data['Date'])
+        data = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)
+        data['Date'] = pd.to_datetime(data['Date'], errors='coerce', dayfirst=True)
         data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
         data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
         display_data(data,"Employee Advance Bank Transfer")
@@ -373,7 +373,7 @@ def employee_salary_tab():
     start_month = 'Mar-2024'
     end_month   = datetime.now().strftime('%b-%Y')
 
-    adv_bank_transfer_df = pd.read_csv(employee_salary_Advance_bankTransfer_csv)
+    adv_bank_transfer_df = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)
     cash_withdrawn_df = employee_cash_withdrawn_data
 
     # Assuming you have a way to fetch or define a list of employees

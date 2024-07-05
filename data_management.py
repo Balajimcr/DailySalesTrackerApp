@@ -22,7 +22,7 @@ def load_employee_names():
 
 def load_data():
     try:
-        data = pd.read_csv(csv_file)
+        data = pd.read_csv(csv_file, parse_dates=['Date'], dayfirst=True)
         data['Date'] = pd.to_datetime(data['Date'], errors='coerce', dayfirst=True)
         
         data["Closing Cash"] = pd.to_numeric(data["Closing Cash"], errors='coerce', downcast="integer")
