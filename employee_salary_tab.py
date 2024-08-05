@@ -358,12 +358,11 @@ def employee_salary_tab():
     if not all(col in employee_sa_cash_withdrawn.columns for col in expected_columns):
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
-        employee_cash_withdrawn_data = employee_sa_cash_withdrawn[expected_columns]
-        data = employee_cash_withdrawn_data.copy()
-        data['Date'] = pd.to_datetime(data['Date'])
-        data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
-        data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
-        display_data(data,"Employee Cash Advance")
+        employee_cash_withdrawn_data = employee_sa_cash_withdrawn[expected_columns].copy()
+        employee_cash_withdrawn_data['Date'] = pd.to_datetime(employee_cash_withdrawn_data['Date'])
+        employee_cash_withdrawn_data = employee_cash_withdrawn_data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
+        employee_cash_withdrawn_data['Date'] = employee_cash_withdrawn_data['Date'].dt.strftime('%d-%m-%Y')  # Format the date for display after sorting
+        display_data(employee_cash_withdrawn_data,"Employee Cash Advance")
         
     employee_Salary_data = update_sales_data()
     
