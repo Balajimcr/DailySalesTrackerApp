@@ -53,12 +53,12 @@ def load_salary_data():
             })
         new_month_df = pd.DataFrame(new_month_data)
         salary_data = pd.concat([salary_data, new_month_df], ignore_index=True)
-        salary_data['Month'] = pd.to_datetime(salary_data['Month'])  # Convert 'Month' to datetime format
+        salary_data['Month'] = pd.to_datetime(salary_data['Month'] ,format='%d-%m-%Y', errors='coerce')  # Convert 'Month' to datetime format
         salary_data['Month'] = salary_data['Month'].dt.strftime('%Y-%m-01')
         salary_data.to_csv(employee_salary_data_csv, index=False, encoding="utf-8")
         
     # Sort the months in descending order
-    salary_data['Month'] = pd.to_datetime(salary_data['Month'])
+    salary_data['Month'] = pd.to_datetime(salary_data['Month'],format='%d-%m-%Y', errors='coerce')  # Convert 'Month' to datetime format
     salary_data = salary_data.sort_values('Month', ascending=False)
         
     return salary_data
@@ -126,7 +126,7 @@ def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
     Employee_Salary_data = Employee_Salary_data[required_columns]
 
     # Convert 'Month' to datetime and then to the required string format
-    Employee_Salary_data['Month'] = pd.to_datetime(Employee_Salary_data['Month']).dt.strftime('%Y-%m-%d')
+    Employee_Salary_data['Month'] = pd.to_datetime(Employee_Salary_data['Month'],format='%d-%m-%Y', errors='coerce').dt.strftime('%Y-%m-%d')
 
     # Sort the DataFrame by Month (descending) and then by Employee Name
     Employee_Salary_data = Employee_Salary_data.sort_values(['Month', 'Employee Name'], ascending=[False, True])
@@ -344,9 +344,9 @@ def employee_salary_tab():
     
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
         data = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)
-        data['Date'] = pd.to_datetime(data['Date'], errors='coerce', dayfirst=True)
+        data['Date'] = pd.to_datetime(data['Date'],format='%d-%m-%Y', errors='coerce', dayfirst=True)
         data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
-        data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
+        data['Date'] = data['Date'].dt.strftime('%d-%m-%Y')  # Format the date for display after sorting
         display_data(data,"Employee Advance Bank Transfer")
     else:
         st.error("File {employee_salary_Advance_bankTransfer_csv} is missing! Please check the CSV file path.")
@@ -359,10 +359,13 @@ def employee_salary_tab():
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
         employee_cash_withdrawn_data = employee_sa_cash_withdrawn[expected_columns].copy()
-        employee_cash_withdrawn_data['Date'] = pd.to_datetime(employee_cash_withdrawn_data['Date'])
+        employee_cash_withdrawn_data['Date'] = pd.to_datetime(employee_cash_withdrawn_data['Date'], format='%d-%m-%Y', errors='coerce')
         employee_cash_withdrawn_data = employee_cash_withdrawn_data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
         employee_cash_withdrawn_data['Date'] = employee_cash_withdrawn_data['Date'].dt.strftime('%d-%m-%Y')  # Format the date for display after sorting
         display_data(employee_cash_withdrawn_data,"Employee Cash Advance")
+        
+        
+
         
     employee_Salary_data = update_sales_data()
     
