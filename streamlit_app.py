@@ -22,7 +22,7 @@ def main_app():
         user_logged_in = login()
         if user_logged_in:
             st.session_state['current_tab'] = Text("Form")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.warning("Please log in to continue.")
     elif is_logged_in():

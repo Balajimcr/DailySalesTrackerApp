@@ -36,6 +36,9 @@ def load_data():
             except:
                 print(f"Warning: Error converting column {col} to numeric (integers).")
         
+        # Remove duplicates in the 'Date' column, keeping the last entry
+        data = data.sort_values('Date').drop_duplicates(subset='Date', keep='last') [[1]]
+        
         data.sort_values(by='Date', inplace=True)
         today_date = datetime.combine(datetime.today().date(), datetime.min.time())
         filtered_data = data[data['Date'] < today_date].copy()
