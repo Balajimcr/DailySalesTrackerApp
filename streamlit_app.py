@@ -8,7 +8,7 @@ from employee_details import employee_details_tab
 from user_authentication import is_logged_in, login
 
 def main_app():
-    st.sidebar.title("Elite Salon - Daily Accounts")
+    st.sidebar.title("Elite Salon - Lalgudi")
     # Initialize session state for the current tab if it's not already set
     if 'current_tab' not in st.session_state:
         st.session_state['current_tab'] = "Login"

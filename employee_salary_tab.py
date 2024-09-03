@@ -70,13 +70,13 @@ def load_salary_data():
 
     return salary_data
 
-def update_sales_data():
+def update_salary_data():
     salary_data = load_salary_data()
     if salary_data is None:
         st.error("Failed to load salary data. Please check the data source.")
         return None  # Exit if the data couldn't be loaded
     
-    st.write("### Update Total Sales Data")
+    st.write("### Update Employee Salary")
 
     # Format 'Month' for display and use in selection
     months = salary_data['Month'].dt.strftime('%b-%Y').unique()
@@ -85,31 +85,33 @@ def update_sales_data():
     # Convert selected month back to datetime for comparison
     selected_month_datetime = pd.to_datetime(selected_month, format='%b-%Y')
 
-    # Create a list to collect updated sales data
+    # Create a list to collect updated salary data
     updates = []
+    
+    salary_data['Month'] = salary_data['Month'].dt.strftime('%b-%Y')
 
     for employee in salary_data['Employee Name'].unique():
         # Filter data for the selected month and employee
         filtered_data = salary_data[(salary_data['Month'] == selected_month_datetime) & 
                                     (salary_data['Employee Name'] == employee)]
         
-        current_sales = filtered_data.iloc[0]['Total Sales'] if not filtered_data.empty else 0
+        current_salary = filtered_data.iloc[0]['Salary'] if not filtered_data.empty else 0
 
-        # Use Streamlit columns to display employee name, current sales, and input for new sales
+        # Use Streamlit columns to display employee name, current salary, and input for new salary
         col1, col2, col3 = st.columns(3)
         with col1:
             st.write(f"{employee}")
         with col2:
-            st.write(f"{current_sales}")
+            st.write(f"{current_salary}")
         with col3:
-            new_sales = st.number_input(f"New Sales for {employee}", key=f"sales_{employee}", value=int(current_sales))
+            new_salary = st.number_input(f"New Salary for {employee}", key=f"salary_{employee}", value=int(current_salary))
         
         # Collect data for updates
-        updates.append((employee, new_sales, filtered_data.index))
+        updates.append((employee, new_salary, filtered_data.index))
 
-    if st.button("Update Sales"):
+    if st.button("Update Salary"):
         new_entries = []
-        for employee, new_sales, idx in updates:
+        for employee, new_salary, idx in updates:
             if idx.empty:
                 new_entries.append({
                     'Month': selected_month_datetime,
@@ -117,24 +119,24 @@ def update_sales_data():
                     'Monthly Bank Transfers': 0,
                     'Monthly Cash Withdrawn': 0,
                     'Total Salary Advance': 0,
-                    'Total Sales': new_sales,
-                    'Salary': new_sales / 2,
+                    'Total Sales': new_salary * 2,  # Assuming sales are double the salary
+                    'Salary': new_salary,
                     'Balance': 0,
                     'Balance Till date': 0
                 })
             else:
-                salary_data.loc[idx, 'Total Sales'] = new_sales
-                salary_data.loc[idx, 'Salary'] = new_sales / 2
+                salary_data.loc[idx, 'Salary'] = new_salary
+                salary_data.loc[idx, 'Total Sales'] = new_salary * 2  # Assuming sales are double the salary
 
         if new_entries:
             new_entries_df = pd.DataFrame(new_entries)
             salary_data = pd.concat([salary_data, new_entries_df], ignore_index=True)
 
         try:
-            salary_data.to_csv(employee_salary_data_csv, index=False, encoding="utf-8")
-            st.success("Sales data updated successfully.")
+            salary_data.to_csv(employee_salary_data_csv, index=False)
+            st.success("Salary data updated successfully.")
         except Exception as e:
-            st.error(f"An error occurred while saving the sales data: {str(e)}")
+            st.error(f"An error occurred while saving the salary data: {str(e)}")
             return None  # Return None if saving fails
     
     display_data(salary_data, "Employee Salary")
@@ -206,7 +208,7 @@ def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
     Employee_Salary_data = Employee_Salary_data[required_columns]
 
     # Convert 'Month' to datetime and then to the required string format
-    Employee_Salary_data['Month'] = pd.to_datetime(Employee_Salary_data['Month'],format='%d-%m-%Y', errors='coerce').dt.strftime('%Y-%m-%d')
+    Employee_Salary_data['Month'] = pd.to_datetime(Employee_Salary_data['Month'],format='%b-%Y', errors='coerce').dt.strftime('%b-%Y')
 
     # Sort the DataFrame by Month (descending) and then by Employee Name
     Employee_Salary_data = Employee_Salary_data.sort_values(['Month', 'Employee Name'], ascending=[False, True])
@@ -217,7 +219,7 @@ def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
     if st.button("Update CSV File"):
         try:
             # Save the DataFrame to CSV
-            Employee_Salary_data.to_csv(csv_file_path, index=False, encoding="utf-8")
+            Employee_Salary_data.to_csv(csv_file_path)
             st.success(f"CSV file updated successfully at {csv_file_path}")
         except Exception as e:
             st.error(f"An error occurred while saving the CSV file: {str(e)}")
@@ -250,7 +252,7 @@ def calculate_financials(month, employee, financial_summary, employee_salary_dat
     monthly_bank_transfers = financials['Monthly Bank Transfers'].sum()
     total_salary_advance = financials['Total Salary Advance'].sum()
     monthly_sales = salary_info['Total Sales'].sum()
-    salary = monthly_sales / 2  # Assuming salary is half of the sales
+    salary = salary_info['Salary'].sum()
     
     # Get the previous balance if it exists, otherwise start from 0
     previous_balance = previous_balances.get(f"{month}-{employee}", 0)
@@ -374,7 +376,7 @@ def employee_salary_tab():
         employee_cash_withdrawn_data['Date'] = employee_cash_withdrawn_data['Date'].dt.strftime('%d-%m-%Y')
         display_data(employee_cash_withdrawn_data, "Employee Cash Advance")
         
-    employee_Salary_data = update_sales_data()
+    employee_Salary_data = update_salary_data()
     
     if employee_Salary_data is None:
         st.error("Failed to update sales data. Please check the data source and processing logic.")
@@ -387,7 +389,7 @@ def employee_salary_tab():
         st.error(f"An error occurred while sorting the data: {str(e)}")
         return
     
-    start_month = 'Mar-2024'
+    start_month = 'Aug-2024'
     end_month = datetime.now().strftime('%b-%Y')
 
     adv_bank_transfer_df = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)

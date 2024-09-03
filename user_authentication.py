@@ -27,7 +27,7 @@ def set_logged_in(logged_in):
 
 # Login form that returns the login status
 def login():
-    st.header("Elite Salon Daily Accounts")
+    st.header("Elite Salon Lalgudi")
     st.header("Login")
     username = st.text_input("Username", key="username")
     password = st.text_input("Password", type="password", key="password")
