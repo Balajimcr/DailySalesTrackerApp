@@ -389,7 +389,7 @@ def employee_salary_tab():
         st.error(f"An error occurred while sorting the data: {str(e)}")
         return
     
-    start_month = 'Aug-2024'
+    start_month = 'Mar-2024'
     end_month = datetime.now().strftime('%b-%Y')
 
     adv_bank_transfer_df = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)
