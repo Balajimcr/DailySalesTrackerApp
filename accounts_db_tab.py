@@ -13,20 +13,12 @@ import os
 
 # Create a connection object.
 conn = st.connection("gsheets", type=GSheetsConnection)
-
-def sync_csv_to_google_sheet(csv_path, sheet_name, unique_identifier):
-    # Read the CSV file
+def sync_csv_to_google_sheet(csv_path, sheet_name):
+    # Read the entire CSV file
     df_local = pd.read_csv(csv_path)
-
-    # Get only the last 10 rows from the CSV
-    df_local = df_local.tail(10)
 
     # Get existing data from Google Sheet
     df_sheet = conn.read(worksheet=sheet_name)
-
-    # Ensure unique_identifier is in both DataFrames
-    if unique_identifier not in df_local.columns or unique_identifier not in df_sheet.columns:
-        raise ValueError(f"Unique identifier '{unique_identifier}' not found in both local CSV and Google Sheets data.")
 
     # Use the columns from the local CSV as expected columns
     expected_columns = df_local.columns.tolist()
@@ -42,17 +34,12 @@ def sync_csv_to_google_sheet(csv_path, sheet_name, unique_identifier):
     df_local = df_local[common_columns]
     df_sheet = df_sheet[common_columns]
 
-    # Find new rows based on the unique identifier
-    new_rows = df_local[~df_local[unique_identifier].isin(df_sheet[unique_identifier])]
+    # Directly concatenate all rows from df_local to df_sheet
+    updated_data = pd.concat([df_sheet, df_local], ignore_index=True)
 
-    # Check if there are new rows to update
-    if not new_rows.empty:
-        # Append only new rows to the Google Sheet data
-        updated_data = pd.concat([df_sheet, new_rows], ignore_index=True)
-        conn.update(worksheet=sheet_name, data=updated_data)
-        print(f"Successfully synced new rows from {csv_path} to Google Sheet: {sheet_name}")
-    else:
-        print(f"No new rows to add from {csv_path} to Google Sheet: {sheet_name}")
+    # Update the Google Sheet with the combined data
+    conn.update(worksheet=sheet_name, data=updated_data)
+    print(f"Successfully added new rows from {csv_path} to Google Sheet: {sheet_name}")
 
 # Updated sync_all_csv_files function with unique identifiers
 def sync_all_csv_files():
@@ -71,7 +58,7 @@ def sync_all_csv_files():
 
         # Check if the file exists
         if os.path.isfile(csv_path):
-            sync_csv_to_google_sheet(csv_path, sheet_name, unique_identifier)
+            sync_csv_to_google_sheet(csv_path, sheet_name)
         else:
             print(f"Warning: CSV file '{csv_file}' not found in '{directory}'. Skipping.")
 
