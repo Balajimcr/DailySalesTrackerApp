@@ -34,12 +34,25 @@ def sync_csv_to_google_sheet(csv_path, sheet_name):
     df_local = df_local[common_columns]
     df_sheet = df_sheet[common_columns]
 
-    # Directly concatenate all rows from df_local to df_sheet
-    updated_data = pd.concat([df_sheet, df_local], ignore_index=True)
+    # Filter the Google Sheet DataFrame to retain only the expected columns
+    df_sheet = df_sheet[expected_columns].loc[:, expected_columns].copy()
 
-    # Update the Google Sheet with the combined data
-    conn.update(worksheet=sheet_name, data=updated_data)
-    print(f"Successfully added new rows from {csv_path} to Google Sheet: {sheet_name}")
+    # Align columns by selecting only common columns between the CSV and Google Sheet
+    common_columns = df_local.columns.intersection(df_sheet.columns)
+    df_local = df_local[common_columns]
+    df_sheet = df_sheet[common_columns]
+
+    # Find new rows by checking for duplicates
+    new_rows = df_local[~df_local.apply(tuple, 1).isin(df_sheet.apply(tuple, 1))]
+
+    # Check if there are new rows to update
+    if not new_rows.empty:
+        # Append only new rows to the Google Sheet data
+        updated_data = pd.concat([df_sheet, new_rows], ignore_index=True)
+        conn.update(worksheet=sheet_name, data=updated_data)
+        print(f"Successfully synced new rows from {csv_path} to Google Sheet: {sheet_name}")
+    else:
+        print(f"No new rows to add from {csv_path} to Google Sheet: {sheet_name}")
 
 # Updated sync_all_csv_files function with unique identifiers
 def sync_all_csv_files():
