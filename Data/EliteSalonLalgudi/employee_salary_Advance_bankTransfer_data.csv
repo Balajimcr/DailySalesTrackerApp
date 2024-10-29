@@ -1,20 +1,20 @@
 Date,Amount,Employee,Comments
 29-03-2024,10000,Kamal,Google Pay
 31-03-2024,1500,Kamal,Google Pay
+31-03-2024,1500,Gopal,Google Pay
 03-04-2024,5000,Kamal,Google Pay
+03-04-2024,5000,Gopal,Google Pay
+08-04-2024,2000,Gopal,Google Pay
+11-04-2024,1000,Gopal,Google Pay
 12-04-2024,1000,Kamal,Google Pay
 14-04-2024,1000,Kamal,Google Pay
 16-04-2024,5000,Kamal,Google Pay
 24-04-2024,1000,Kamal,Gpay to no
 28-04-2024,240,Kamal,Google Pay
 01-05-2024,7000,Kamal,Gpay to Prabhu
+04-05-2024,3000,Kamal,7558903514
 07-05-2024,6000,Kamal,gpay to prabhu
 07-05-2024,300,Kamal,Gpay to NO
-04-05-2024,3000,Kamal,7558903514
-31-03-2024,1500,Gopal,Google Pay
-03-04-2024,5000,Gopal,Google Pay
-08-04-2024,2000,Gopal,Google Pay
-11-04-2024,1000,Gopal,Google Pay
 17-05-2024,2000,Kamal,Gpay to prabhu 
 18-05-2024,1000,Kamal,Gpay to Gopal
 18-05-2024,1200,Venkatesh,Balance Salary
@@ -24,14 +24,14 @@ Date,Amount,Employee,Comments
 21-05-2024,5000,Venkatesh,Gpay
 29-05-2024,11000,Kamal,Google Pay
 30-05-2024,1000,Venkatesh,Gpay
-01-06-2024,5000,Gopal,Gpay
 31-05-2024,2200,Venkatesh,gpay
+01-06-2024,5000,Gopal,Gpay
 02-06-2024,800,Venkatesh,gpay
 03-06-2024,1000,Kamal,Cash from Appa
+07-06-2024,1000,Venkatesh,gpay
 08-06-2024,5000,Gopal,GPAY
 08-06-2024,5000,Kamal,Gpay to Kamal
 16-06-2024,3000,Gopal,Gpay to Kamal
-07-06-2024,1000,Venkatesh,gpay
 18-06-2024,1000,Venkatesh,gpay
 18-06-2024,5000,Kamal,Gpay to Gopal
 20-06-2024,1000,Kamal,Gpay to 9488774135
@@ -57,16 +57,21 @@ Date,Amount,Employee,Comments
 14-08-2024,10000,Venkatesh,17&6-Aug- 5k each
 16-08-2024,2000,Shakthivel,Salary Advance
 20-08-2024,3000,Kamal,Gpay to Kamal Mom Rathinam
-23-08-2024,2000,Gopal,Gpay
 20-08-2024,1100,Venkatesh,gpay
+23-08-2024,2000,Gopal,Gpay
 23-08-2024,500,Venkatesh,gpay
 25-08-2024,2000,Shakthivel,Salary Advance
 31-08-2024,6230,Venkatesh,gpay
 02-09-2024,8000,Kamal,Gpay to Kamal Mom Rathinam
+07-09-2024,3000,Gopal,Gpay
 15-09-2024,1200,Kamal,Gpay to Gopal
 15-09-2024,240,Kamal,Mobile Recharge
-07-09-2024,3000,Gopal,Gpay
 24-09-2024,2000,Gopal,Gpay
-04-10-2024,6000,Velu,Gpay
 29-09-2024,10000,Kamal,Gpay to Mon
 29-09-2024,2000,Kamal,Gpay to Gopal
+04-10-2024,6000,Velu,Gpay
+08-10-2024,2000,Gopal,Gpay
+21-10-2024,2000,Gopal,Gpay
+24-10-2024,700,Kamal,Cash from Appa
+26-10-2024,1200,Gopal,Gpay(Simgarden 600+600)
+28-10-2024,2000,Gopal,Cash from Balaji
