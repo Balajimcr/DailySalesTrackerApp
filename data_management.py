@@ -20,8 +20,11 @@ def load_employee_names():
         employee_names = ["Kamal","Gopal","Arumugam","Employee 4"]
     return employee_names
 
+
+
+
 def load_data():
-    try:
+    try:                
         data = pd.read_csv(csv_file, parse_dates=['Date'], dayfirst=True)
         data['Date'] = pd.to_datetime(data['Date'], errors='coerce', dayfirst=True)
         
@@ -58,6 +61,7 @@ def load_data():
         ])
         last_closing_cash = 0
     return data, last_closing_cash
+
 
 def save_data(data):
     data.to_csv(csv_file, index=False)
