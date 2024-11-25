@@ -6,7 +6,6 @@ from ui_helpers import Text, tabs_font_css,display_text
 from datetime import date, datetime, timedelta
 from data_management import csv_file
 from accounts_db_tab import sync_all_csv_files
-from accounts_db_tab import sync_google_sheets_to_all_csv_files
 
 def form_tab():
     # Initialize data, last closing cash, and employee names
