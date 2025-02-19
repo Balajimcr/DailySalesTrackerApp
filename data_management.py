@@ -21,8 +21,6 @@ def load_employee_names():
     return employee_names
 
 
-
-
 def load_data():
     try:                
         data = pd.read_csv(csv_file, parse_dates=['Date'], dayfirst=True)

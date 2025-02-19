@@ -41,7 +41,7 @@ def form_tab():
     # Data input fields in the left column
     with left_col:
         st.subheader("Sales")
-        date_input = st.date_input(Text("Date (தேதி)"), value=st.session_state.get('date_input', date.today()), format="DD-MMM-YYYY")
+        date_input = st.date_input(Text("Date (தேதி)"), value=st.session_state.get('date_input', date.today()), format="DD-MM-YYYY")
         opening_cash = st.number_input(Text("Opening Cash (ஆரம்ப இருப்பு)"), value=st.session_state.get('opening_cash', last_closing_cash), min_value=0, step=100)
         total_sales_pos = st.number_input(Text("Total Sales POS ( சேல்ஸ் )"), value=st.session_state.get('total_sales_pos', 0), min_value=0, step=100)
         paytm = st.number_input(Text("Paytm (பேடிஎம்)"), value=st.session_state.get('paytm', 0), min_value=0, step=100)

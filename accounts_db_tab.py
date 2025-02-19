@@ -105,7 +105,6 @@ def sync_all_csv_files():
         else:
             print(f"Warning: CSV file '{csv_file}' not found in '{directory}'. Skipping.")
 
-# Since I can't actually access files or Google Sheets here, this is just for illustrative purposes
 def sync_google_sheets_to_all_csv_files():
     csv_files_and_sheets = {
         'database_collection.csv': {'sheet_name': 'Database', 'unique_identifier': 'Date'},
@@ -113,7 +112,7 @@ def sync_google_sheets_to_all_csv_files():
         'employee_salary_data.csv': {'sheet_name': 'EmployeeSalaryData', 'unique_identifier': 'Month'}
     }
 
-    directory = os.path.join(UserDirectoryPath)  # Ensure correct directory path
+    directory = os.path.join(UserDirectoryPath)
 
     for csv_file, sheet_info in csv_files_and_sheets.items():
         csv_path = os.path.join(directory, csv_file)
@@ -121,17 +120,27 @@ def sync_google_sheets_to_all_csv_files():
         unique_identifier = sheet_info['unique_identifier']
 
         try:
-            # Get data from Google Sheet
             df_sheet = conn.read(worksheet=sheet_name)
             df_sheet.columns = df_sheet.columns.astype(str)
 
-            # Convert all numeric columns to integers
             for col in df_sheet.columns:
                 if pd.api.types.is_numeric_dtype(df_sheet[col]):
-                    # Fill NaN values with 0 before conversion
                     df_sheet[col] = df_sheet[col].fillna(0).astype(int)
 
-            # Save the entire data from Google Sheet to the local CSV
+            # Format the 'Date' column if it exists and is a datetime-like column
+            if 'Date' in df_sheet.columns:
+                try:
+                    df_sheet['Date'] = pd.to_datetime(df_sheet['Date']).dt.strftime('%d-%b-%Y')
+                except (ValueError, TypeError):
+                    print(f"Warning: 'Date' column in '{sheet_name}' is not in a recognized date format. Skipping date formatting.")
+
+            # Format the 'Month' column if it exists and is a datetime-like column
+            if 'Month' in df_sheet.columns:
+                try:
+                    df_sheet['Month'] = pd.to_datetime(df_sheet['Month']).dt.strftime('%b-%y')
+                except (ValueError, TypeError):
+                    print(f"Warning: 'Month' column in '{sheet_name}' is not in a recognized date format. Skipping month formatting.")
+
             df_sheet.to_csv(csv_path, index=False)
             print(f"Successfully replaced local CSV '{csv_file}' with data from Google Sheet '{sheet_name}'.")
             st.success(f"Local CSV '{csv_file}' updated with data from Google Sheet '{sheet_name}'!")

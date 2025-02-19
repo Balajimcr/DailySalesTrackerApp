@@ -28,24 +28,22 @@ def save_data_to_csv(new_data, file_name=employee_salary_Advance_bankTransfer_cs
     return pd.read_csv(file_name, parse_dates=['Date'], dayfirst=True)  # Return updated data
 
 def load_salary_data():
+    """Load salary data from CSV, handling potential errors."""
     if not os.path.exists(employee_salary_data_csv):
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
-
     try:
-        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=True)
+        # Explicitly parse the 'Month' column as dates
+        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'])
+        # Ensure date format is correct
+        salary_data['Month'] = pd.to_datetime(salary_data['Month'], format='%b-%y')
+        return salary_data.sort_values('Month', ascending=False)
     except FileNotFoundError:
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
     except Exception as e:
         st.error(f"An error occurred while loading the salary data: {str(e)}")
         return None
-
-    current_month = datetime.now().replace(day=1)   
-
-    salary_data = salary_data.sort_values('Month', ascending=False)
-
-    return salary_data
 
 def update_salary_data():
     salary_data = load_salary_data()
