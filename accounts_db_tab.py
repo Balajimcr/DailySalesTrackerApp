@@ -297,7 +297,7 @@ def accounts_db_tab():
         if 'Date' in data.columns:
             data['Date'] = pd.to_datetime(data['Date'])
             data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
-            data['Date'] = data['Date'].dt.strftime('%d-%m-%Y')  # Format the date for display after sorting
+            data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
 
         expected_columns = ["Date", "Opening Cash", "Closing Cash", "Cash Difference", "Total Sales POS", "Paytm", "Total Cash", "Denomination Total", "Cash Withdrawn"]
         
