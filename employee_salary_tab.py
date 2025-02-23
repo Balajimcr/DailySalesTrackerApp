@@ -311,7 +311,7 @@ def employee_salary_tab():
         return
 
     if 'Date' in employee_sa_cash_withdrawn.columns:
-        employee_sa_cash_withdrawn['Date'] = pd.to_datetime(employee_sa_cash_withdrawn['Date']).dt.strftime('%d-%b-%Y')
+        employee_sa_cash_withdrawn['Date'] = pd.to_datetime(employee_sa_cash_withdrawn['Date']).dt.strftime('%d-%b-%y')
         employee_sa_cash_withdrawn = employee_sa_cash_withdrawn.sort_values(by='Date', ascending=False)
         
     # User Inputs
@@ -322,7 +322,7 @@ def employee_salary_tab():
 
     if st.button("Save Entry"):
         new_entry = {
-            "Date": input_date.strftime('%d-%b-%Y'),
+            "Date": input_date.strftime('%d-%b-%y'),
             "Amount": input_amount,
             "Employee": input_employee,
             "Comments": input_comments
@@ -331,9 +331,9 @@ def employee_salary_tab():
     
     if os.path.isfile(employee_salary_Advance_bankTransfer_csv):
         data = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)
-        data['Date'] = pd.to_datetime(data['Date'],format='%d-%b-%Y', errors='coerce', dayfirst=True)
+        data['Date'] = pd.to_datetime(data['Date'],format='%d-%b-%y', errors='coerce', dayfirst=True)
         data = data.sort_values(by='Date', ascending=False)
-        data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')
+        data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
         display_data(data, "Employee Advance Bank Transfer")
     else:
         st.error(f"File {employee_salary_Advance_bankTransfer_csv} is missing! Please check the CSV file path.")
@@ -346,9 +346,9 @@ def employee_salary_tab():
         st.error("The data structure has changed or some columns are missing. Please check the CSV file.")
     else:
         employee_cash_withdrawn_data = employee_sa_cash_withdrawn[expected_columns].copy()
-        employee_cash_withdrawn_data['Date'] = pd.to_datetime(employee_cash_withdrawn_data['Date'], format='%d-%b-%Y', errors='coerce')
+        employee_cash_withdrawn_data['Date'] = pd.to_datetime(employee_cash_withdrawn_data['Date'], format='%d-%b-%y', errors='coerce')
         employee_cash_withdrawn_data = employee_cash_withdrawn_data.sort_values(by='Date', ascending=False)
-        employee_cash_withdrawn_data['Date'] = employee_cash_withdrawn_data['Date'].dt.strftime('%d-%b-%Y')
+        employee_cash_withdrawn_data['Date'] = employee_cash_withdrawn_data['Date'].dt.strftime('%d-%b-%y')
         display_data(employee_cash_withdrawn_data, "Employee Cash Advance")
         
     employee_Salary_data = update_salary_data()

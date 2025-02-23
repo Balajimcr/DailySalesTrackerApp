@@ -130,7 +130,7 @@ def sync_google_sheets_to_all_csv_files():
             # Format the 'Date' column if it exists and is a datetime-like column
             if 'Date' in df_sheet.columns:
                 try:
-                    df_sheet['Date'] = pd.to_datetime(df_sheet['Date']).dt.strftime('%d-%b-%Y')
+                    df_sheet['Date'] = pd.to_datetime(df_sheet['Date']).dt.strftime('%d-%b-%y')
                 except (ValueError, TypeError):
                     print(f"Warning: 'Date' column in '{sheet_name}' is not in a recognized date format. Skipping date formatting.")
 
@@ -236,7 +236,7 @@ def display_last_entry(data,index, employees):
         data["Closing Cash"] = pd.to_numeric(data["Closing Cash"], errors='coerce', downcast="integer")
         
         top_entry = data.iloc[index]
-        top_entry['Date'] = pd.to_datetime(top_entry['Date'], dayfirst=True).strftime('%d-%b-%Y (%A)')
+        top_entry['Date'] = pd.to_datetime(top_entry['Date'], dayfirst=True).strftime('%d-%b-%y (%A)')
         
         employees = [employeeName.split("-")[0].strip() for employeeName in employees]
 
@@ -306,7 +306,7 @@ def accounts_db_tab():
         if 'Date' in data.columns:
             data['Date'] = pd.to_datetime(data['Date'])
             data = data.sort_values(by='Date', ascending=False)  # Sort by date in ascending order
-            data['Date'] = data['Date'].dt.strftime('%d-%b-%Y')  # Format the date for display after sorting
+            data['Date'] = data['Date'].dt.strftime('%d-%b-%y')  # Format the date for display after sorting
 
         expected_columns = ["Date", "Opening Cash", "Closing Cash", "Cash Difference", "Total Sales POS", "Paytm", "Total Cash", "Denomination Total", "Cash Withdrawn"]
         
