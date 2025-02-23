@@ -1,14 +1,14 @@
 import pandas as pd
 from datetime import datetime
 import hashlib
-import pandas as pd  # Make sure pandas is imported
-
+import pandas as pd
 UserDirectoryPath = "Data/EliteSalonLalgudi/"
 
 csv_file = UserDirectoryPath +"database_collection.csv"
 employee_csv = UserDirectoryPath +"Employee_data.csv"
 employee_salary_Advance_bankTransfer_csv = UserDirectoryPath +"employee_salary_Advance_bankTransfer_data.csv"
 employee_salary_data_csv = UserDirectoryPath +"employee_salary_data.csv"
+employee_salary_csv = UserDirectoryPath +"employee_salary.csv"
 credentials_path = "/.streamlit/secrets.toml"
 
 def load_employee_names():

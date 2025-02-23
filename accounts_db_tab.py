@@ -89,7 +89,8 @@ def sync_all_csv_files():
     csv_files_and_sheets = {
         'database_collection.csv': {'sheet_name': 'Database', 'unique_identifier': 'Date'},
         'employee_salary_Advance_bankTransfer_data.csv': {'sheet_name': 'EmployeeSalaryAdvance', 'unique_identifier': 'Date'},
-        'employee_salary_data.csv': {'sheet_name': 'EmployeeSalaryData', 'unique_identifier': 'Month'}
+        'employee_salary_data.csv': {'sheet_name': 'EmployeeSalaryData', 'unique_identifier': 'Month'},
+        'employee_salary.csv': {'sheet_name': 'EmployeeSalary', 'unique_identifier': 'Month'}
     }
 
     directory = os.path.join(UserDirectoryPath)  # Corrected directory path
