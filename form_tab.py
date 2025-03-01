@@ -6,6 +6,7 @@ from ui_helpers import Text, tabs_font_css,display_text
 from datetime import date, datetime, timedelta
 from data_management import csv_file
 from accounts_db_tab import sync_all_csv_files
+from config import SHOP_NAME
 
 def form_tab():
     # Initialize data, last closing cash, and employee names
@@ -29,9 +30,7 @@ def form_tab():
         except ValueError:
             opening_cash_value = last_closing_cash  # Fallback to last_closing_cash if conversion fails
 
-    st.title("Elite Salon Daily Accounts")
-    
-    #sync_google_sheets_to_all_csv_files()
+    st.title(SHOP_NAME)
 
     st.write(tabs_font_css, unsafe_allow_html=True)
 

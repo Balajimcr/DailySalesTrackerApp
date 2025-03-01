@@ -5,7 +5,7 @@ import datetime
 from ui_helpers import display_text
 from data_management import load_employee_names,UserDirectoryPath,credentials_path,csv_file
 from data_management import load_data, save_data # Assuming save_data is a function you will define to save data back to CSV
-
+from config import SHOP_NAME
 import base64
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
@@ -291,7 +291,7 @@ def display_last_entry(data,index, employees):
 
     
 def accounts_db_tab():
-    st.title("Elite Salon Lalgudi")
+    st.title(SHOP_NAME)
 
     try:
         data, last_closing_cash = load_data()

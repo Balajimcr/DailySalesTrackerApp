@@ -5,7 +5,7 @@ import datetime
 from datetime import date, datetime, timedelta
 from ui_helpers import displayhtml_data
 from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv,employee_salary_data_csv,employee_salary_csv
-
+from config import start_month
 import streamlit as st
 from data_management import load_data, load_employee_names
 
@@ -374,7 +374,6 @@ def employee_salary_tab():
         st.error(f"An error occurred while sorting the data: {str(e)}")
         return
     
-    start_month = 'Mar-24'
     end_month = datetime.now().strftime('%b-%y')
 
     adv_bank_transfer_df = pd.read_csv(employee_salary_Advance_bankTransfer_csv, parse_dates=['Date'], dayfirst=True)

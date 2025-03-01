@@ -1,8 +1,8 @@
 import pandas as pd
 from datetime import datetime
+from config import UserDirectoryPath,employee_names_def
 import hashlib
 import pandas as pd
-UserDirectoryPath = "Data/EliteSalonLalgudi/"
 
 csv_file = UserDirectoryPath +"database_collection.csv"
 employee_csv = UserDirectoryPath +"Employee_data.csv"
@@ -17,7 +17,7 @@ def load_employee_names():
         employee_names = employee_data["Name"].tolist()
     except (FileNotFoundError, IndexError):
         st.error("Employee names file not found! Please ensure the file exists.")
-        employee_names = ["Kamal","Gopal","Arumugam","Employee 4"]
+        employee_names = employee_names_def
     return employee_names
 
 
