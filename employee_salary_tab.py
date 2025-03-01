@@ -1,13 +1,13 @@
-import streamlit as st
-from data_management import load_data, load_employee_names
-import pandas as pd
 import os
+import pandas as pd
 
 import datetime
 from datetime import date, datetime, timedelta
 from ui_helpers import displayhtml_data
 from data_management import csv_file, employee_csv, employee_salary_Advance_bankTransfer_csv,employee_salary_data_csv,employee_salary_csv
 
+import streamlit as st
+from data_management import load_data, load_employee_names
 
 def display_data(dataframe, title):
     """Display a dataframe with a title."""
@@ -33,14 +33,11 @@ def load_salary_data():
         st.error("Salary data file is missing. Please ensure it exists in the correct location.")
         return None
     try:
-        # Explicitly parse the 'Month' column as dates
-        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'])
-        # Ensure date format is correct
-        salary_data['Month'] = pd.to_datetime(salary_data['Month'], format='%b-%y')
-        return salary_data.sort_values('Month', ascending=False)
-    except FileNotFoundError:
-        st.error("Salary data file is missing. Please ensure it exists in the correct location.")
-        return None
+        salary_data = pd.read_csv(employee_salary_data_csv, parse_dates=['Month'], dayfirst=True, encoding='utf-8')
+        salary_data['Month'] = pd.to_datetime(salary_data['Month'], format='%d-%b-%y', errors='coerce')
+        # Format Month as DD-Mmm-YY for consistency
+        salary_data['Month'] = salary_data['Month'].dt.strftime('%d-%b-%y')
+        return salary_data.sort_values(by='Month', ascending=False)
     except Exception as e:
         st.error(f"An error occurred while loading the salary data: {str(e)}")
         return None
@@ -54,6 +51,7 @@ def update_salary_data():
     st.write("### Update Employee Salary")
 
     # Format 'Month' for display and use in selection
+    salary_data['Month'] = pd.to_datetime(salary_data['Month'])
     months = salary_data['Month'].dt.strftime('%b-%y').unique()
     selected_month = st.selectbox("Select Month", options=months)
 
