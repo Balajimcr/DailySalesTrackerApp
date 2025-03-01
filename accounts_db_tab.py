@@ -291,7 +291,7 @@ def display_last_entry(data,index, employees):
 
     
 def accounts_db_tab():
-    st.title("Daily Accounts Database")
+    st.title("Elite Salon Lalgudi")
 
     try:
         data, last_closing_cash = load_data()
