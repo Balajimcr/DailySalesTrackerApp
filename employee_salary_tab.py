@@ -188,7 +188,6 @@ def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
 
     # Convert 'Month' back to string format 'Mmm-YY' for display and saving
     Employee_Salary_data['Month'] = Employee_Salary_data['Month_dt'].dt.strftime('%b-%y')    
-    
     # Drop the temporary datetime column
     Employee_Salary_data = Employee_Salary_data.drop(columns=['Month_dt'])
     
