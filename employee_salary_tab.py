@@ -192,6 +192,13 @@ def update_employee_salary_csv(Employee_Salary_data, csv_file_path):
     # Drop the temporary datetime column
     Employee_Salary_data = Employee_Salary_data.drop(columns=['Month_dt'])
     
+    # Convert all numeric columns to integers
+    numeric_columns = ['Monthly Bank Transfers', 'Monthly Cash Withdrawn', 'Total Salary Advance', 
+                      'Total Sales', 'Salary', 'Balance', 'Balance Till date']
+    
+    for col in numeric_columns:
+        Employee_Salary_data[col] = Employee_Salary_data[col].round().astype(int)
+
     # Compute 'Total Sales' based on 'Salary' (Total Sales = Salary / 0.45) and convert to integer
     Employee_Salary_data['Total Sales'] = (Employee_Salary_data['Salary'] / 0.45).round().astype(int)
 
