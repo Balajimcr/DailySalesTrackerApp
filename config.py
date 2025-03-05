@@ -9,5 +9,5 @@ SHOP_NAME = "Elite Salon Lalgudi"
 BRANCH_NAME = "Elite Salon - Lalgudi"
 UserDirectoryPath = "Data/EliteSalonLalgudi/"
 
-employee_names_def = ["Kamal","Shakthivel","Employee 3","Employee 4"]
+employee_names_def = ["Kamal","Shakthivel","Arun","Employee 4"]
 start_month = 'Mar-24'
